@@ -36,7 +36,7 @@ const STEPS = [
     { title: "自社データ", description: "配当・利益" },
     { title: "類似業種", description: "業界データ" },
     { title: "純資産", description: "資産・負債" },
-    { title: "試算結果", description: "評価額算出" },
+    { title: "計算結果", description: "評価額算出" },
     { title: "シミュ", description: "利益0仮定" },
 ];
 
@@ -49,6 +49,21 @@ function ValuationContent() {
     const [financials, setFinancials] = useState<Financials | null>(null);
     const [showResult, setShowResult] = useState(false);
     const [activeDummyPattern, setActiveDummyPattern] = useState<DummyDataPatternKey | null>(null);
+
+    // sessionStorageからデータを読み込む
+    useEffect(() => {
+        if (mode === "bulk") {
+            const savedBasicInfo = sessionStorage.getItem('valuationBasicInfo');
+            const savedFinancials = sessionStorage.getItem('valuationFinancials');
+
+            if (savedBasicInfo) {
+                setBasicInfo(JSON.parse(savedBasicInfo));
+            }
+            if (savedFinancials) {
+                setFinancials(JSON.parse(savedFinancials));
+            }
+        }
+    }, [mode]);
 
     const handleNextStep1 = (data: Partial<BasicInfo>, dummyDataKey?: DummyDataPatternKey) => {
         if (dummyDataKey) {
@@ -132,11 +147,20 @@ function ValuationContent() {
         window.scrollTo(0, 0);
     };
 
+    const handleBulkBack = () => {
+        window.location.href = '/';
+    };
+
     return (
         <div className="space-y-8 py-8">
             {/* Bulk Input Mode */}
             {mode === "bulk" && !showResult && (
-                <BulkInput onSubmit={handleBulkSubmit} />
+                <BulkInput
+                    onSubmit={handleBulkSubmit}
+                    onBack={handleBulkBack}
+                    defaultBasicInfo={basicInfo}
+                    defaultFinancials={financials}
+                />
             )}
 
             {/* Step-by-Step Mode or Bulk Result */}

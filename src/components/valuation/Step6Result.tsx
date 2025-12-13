@@ -4,8 +4,6 @@ import { BasicInfo, Financials } from "@/types/valuation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useMemo } from "react";
-import Link from "next/link";
-
 
 import { calculateFinalValuation } from "@/lib/valuation-logic";
 
@@ -24,10 +22,19 @@ export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Prop
         return result;
     }, [basicInfo, financials]);
 
+    const handleBulkEdit = () => {
+        // データをsessionStorageに保存
+        sessionStorage.setItem('valuationBasicInfo', JSON.stringify(basicInfo));
+        sessionStorage.setItem('valuationFinancials', JSON.stringify(financials));
+
+        // ページ遷移
+        window.location.href = '/valuation?mode=bulk';
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="text-center space-y-2">
-                <h2 className="text-3xl font-black text-primary">試算結果 (Step 6/6)</h2>
+                <h2 className="text-3xl font-black text-primary">計算結果 (Step 6/6)</h2>
                 <p className="text-muted-foreground">最も有利（低価）となる評価方式を自動判定しました。</p>
             </div>
 
@@ -84,11 +91,14 @@ export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Prop
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row justify-center gap-4 pt-8">
-                <Button variant="outline" onClick={onBack} size="lg">
-                    戻って修正する
+                <Button type="button" variant="outline" onClick={onBack} size="lg">
+                    個別で修正
+                </Button>
+                <Button type="button" variant="outline" onClick={handleBulkEdit} size="lg">
+                    一覧で修正
                 </Button>
                 {onNext && (
-                    <Button onClick={onNext} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                    <Button type="button" onClick={onNext} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
                         シミュレーションへ
                     </Button>
                 )}

@@ -144,7 +144,7 @@ export function Step7Simulation({ basicInfo, financials, onBack }: Step7Props) {
 
             <div className="flex justify-center gap-4 pt-8">
                 <Button variant="outline" onClick={onBack} size="lg">
-                    Step 6に戻る
+                    戻る
                 </Button>
                 <Link href="/">
                     <Button variant="ghost" size="lg">

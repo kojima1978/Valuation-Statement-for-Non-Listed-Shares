@@ -40,6 +40,14 @@ export interface Financials {
     ownProfit: number;    // c
     ownBookValue: number; // d
 
+    // Additional Own Company Data (b1, b2, c1, c2, d1, d2)
+    ownDividendsB1?: number; // b1: (直前期 + 2期前) ÷ 2
+    ownDividendsB2?: number; // b2: (2期前 + 3期前) ÷ 2
+    ownProfitC1?: number;    // c1: 直前期の差引利益金額
+    ownProfitC2?: number;    // c2: (直前期 + 2期前) ÷ 2
+    ownBookValueD1?: number; // d1: 直前期の純資産価額
+    ownBookValueD2?: number; // d2: 2期前の純資産価額
+
     // Step 3 Raw Inputs (for persistence)
     ownDividendPrev?: number;
     ownDividend2Prev?: number;

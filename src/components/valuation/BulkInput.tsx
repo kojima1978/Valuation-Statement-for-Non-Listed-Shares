@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -12,21 +12,24 @@ import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
 
 interface BulkInputProps {
   onSubmit: (basicInfo: BasicInfo, financials: Financials) => void;
+  onBack?: () => void;
+  defaultBasicInfo?: BasicInfo | null;
+  defaultFinancials?: Financials | null;
 }
 
-export function BulkInput({ onSubmit }: BulkInputProps) {
+export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancials }: BulkInputProps) {
   const [formData, setFormData] = useState({
     // Step 1: 基礎情報
     companyName: "",
     taxationPeriod: "",
     previousPeriod: "",
-    capital: "",  // 千円
-    issuedShares: "",  // 株
+    capital: "",
+    issuedShares: "",
 
     // Step 2: 会社規模
-    employees: "",  // 人
-    totalAssets: "",  // 千円
-    sales: "",  // 千円
+    employees: "",
+    totalAssets: "",
+    sales: "",
     industryType: "Wholesale" as IndustryType,
 
     // Step 3: 自社データ（千円）
@@ -45,14 +48,14 @@ export function BulkInput({ onSubmit }: BulkInputProps) {
     ownRetainedEarnings2Prev: "",
 
     // Step 4: 類似業種データ
-    industryStockPriceCurrent: "",  // 円
-    industryStockPrice1MonthBefore: "",  // 円
-    industryStockPrice2MonthsBefore: "",  // 円
-    industryStockPricePrevYearAverage: "",  // 円
-    industryDividendsYen: "",  // 円
-    industryDividendsSen: "",  // 銭（小数点1位）
-    industryProfit: "",  // 円
-    industryBookValue: "",  // 円
+    industryStockPriceCurrent: "",
+    industryStockPrice1MonthBefore: "",
+    industryStockPrice2MonthsBefore: "",
+    industryStockPricePrevYearAverage: "",
+    industryDividendsYen: "",
+    industryDividendsSen: "",
+    industryProfit: "",
+    industryBookValue: "",
 
     // Step 5: 純資産データ（千円）
     assetsBookValue: "",
@@ -60,6 +63,57 @@ export function BulkInput({ onSubmit }: BulkInputProps) {
     liabilitiesBookValue: "",
     liabilitiesInheritanceValue: "",
   });
+
+  // Update formData when props change
+  useEffect(() => {
+    if (defaultBasicInfo || defaultFinancials) {
+      setFormData({
+        // Step 1: 基礎情報
+        companyName: defaultBasicInfo?.companyName || "",
+        taxationPeriod: defaultBasicInfo?.taxationPeriod || "",
+        previousPeriod: defaultBasicInfo?.previousPeriod || "",
+        capital: defaultBasicInfo?.capital ? (defaultBasicInfo.capital / 1000).toString() : "",
+        issuedShares: defaultBasicInfo?.issuedShares?.toString() || "",
+
+        // Step 2: 会社規模
+        employees: defaultBasicInfo?.employees?.toString() || "",
+        totalAssets: defaultBasicInfo?.totalAssets ? (defaultBasicInfo.totalAssets / 1000).toString() : "",
+        sales: defaultBasicInfo?.sales ? (defaultBasicInfo.sales / 1000).toString() : "",
+        industryType: (defaultBasicInfo?.industryType || "Wholesale") as IndustryType,
+
+        // Step 3: 自社データ（千円）
+        ownDividendPrev: defaultFinancials?.ownDividendPrev?.toString() || "",
+        ownDividend2Prev: defaultFinancials?.ownDividend2Prev?.toString() || "",
+        ownDividend3Prev: defaultFinancials?.ownDividend3Prev?.toString() || "",
+        ownTaxableIncomePrev: defaultFinancials?.ownTaxableIncomePrev?.toString() || "",
+        ownCarryForwardLossPrev: defaultFinancials?.ownCarryForwardLossPrev?.toString() || "",
+        ownTaxableIncome2Prev: defaultFinancials?.ownTaxableIncome2Prev?.toString() || "",
+        ownCarryForwardLoss2Prev: defaultFinancials?.ownCarryForwardLoss2Prev?.toString() || "",
+        ownTaxableIncome3Prev: defaultFinancials?.ownTaxableIncome3Prev?.toString() || "",
+        ownCarryForwardLoss3Prev: defaultFinancials?.ownCarryForwardLoss3Prev?.toString() || "",
+        ownCapitalPrev: defaultFinancials?.ownCapitalPrev?.toString() || "",
+        ownRetainedEarningsPrev: defaultFinancials?.ownRetainedEarningsPrev?.toString() || "",
+        ownCapital2Prev: defaultFinancials?.ownCapital2Prev?.toString() || "",
+        ownRetainedEarnings2Prev: defaultFinancials?.ownRetainedEarnings2Prev?.toString() || "",
+
+        // Step 4: 類似業種データ
+        industryStockPriceCurrent: defaultFinancials?.industryStockPriceCurrent?.toString() || "",
+        industryStockPrice1MonthBefore: defaultFinancials?.industryStockPrice1MonthBefore?.toString() || "",
+        industryStockPrice2MonthsBefore: defaultFinancials?.industryStockPrice2MonthsBefore?.toString() || "",
+        industryStockPricePrevYearAverage: defaultFinancials?.industryStockPricePrevYearAverage?.toString() || "",
+        industryDividendsYen: defaultFinancials?.industryDividends ? Math.floor(defaultFinancials.industryDividends).toString() : "",
+        industryDividendsSen: defaultFinancials?.industryDividends ? ((defaultFinancials.industryDividends % 1) * 10).toString() : "",
+        industryProfit: defaultFinancials?.industryProfit?.toString() || "",
+        industryBookValue: defaultFinancials?.industryBookValue?.toString() || "",
+
+        // Step 5: 純資産データ（千円）
+        assetsBookValue: defaultFinancials?.assetsBookValue ? (defaultFinancials.assetsBookValue / 1000).toString() : "",
+        assetsInheritanceValue: defaultFinancials?.assetsInheritanceValue ? (defaultFinancials.assetsInheritanceValue / 1000).toString() : "",
+        liabilitiesBookValue: defaultFinancials?.liabilitiesBookValue ? (defaultFinancials.liabilitiesBookValue / 1000).toString() : "",
+        liabilitiesInheritanceValue: defaultFinancials?.liabilitiesInheritanceValue ? (defaultFinancials.liabilitiesInheritanceValue / 1000).toString() : "",
+      });
+    }
+  }, [defaultBasicInfo, defaultFinancials]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
@@ -864,8 +918,13 @@ export function BulkInput({ onSubmit }: BulkInputProps) {
           </div>
         </div>
 
-        <div className="flex justify-end pt-4">
-          <Button type="submit" size="lg" className="min-w-[200px]">
+        <div className="flex justify-between pt-4">
+          {onBack && (
+            <Button type="button" variant="outline" size="lg" onClick={onBack}>
+              トップに戻る
+            </Button>
+          )}
+          <Button type="submit" size="lg" className="min-w-[200px] ml-auto">
             評価額を算出
           </Button>
         </div>

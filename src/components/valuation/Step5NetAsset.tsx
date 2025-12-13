@@ -235,7 +235,7 @@ export function Step5NetAsset({ basicInfo, onBack, onNext, defaultValues }: Step
                             戻る
                         </Button>
                         <Button type="submit" size="lg" className="flex-[2] shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-                            試算する (Step 6へ)
+                            計算する (Step 6へ)
                         </Button>
                     </div>
                 </form>

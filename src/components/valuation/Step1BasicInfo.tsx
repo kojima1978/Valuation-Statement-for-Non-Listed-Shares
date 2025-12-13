@@ -22,6 +22,7 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
         capital: defaultValues?.capital?.toString() || "",
         issuedShares: defaultValues?.issuedShares?.toString() || "",
     });
+    const [selectedDummyPattern, setSelectedDummyPattern] = useState<DummyDataPatternKey | undefined>(undefined);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
         const { name, value } = e.target;
@@ -37,9 +38,10 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
             capital: pattern.capital.toString(),
             issuedShares: pattern.issuedShares.toString(),
         });
+        setSelectedDummyPattern(patternKey);
     };
 
-    const handleSubmit = (e: React.FormEvent, dummyDataKey?: DummyDataPatternKey) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         // Parse numbers
@@ -57,18 +59,7 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
             previousPeriod: formData.previousPeriod,
             capital,
             issuedShares,
-        }, dummyDataKey);
-    };
-
-    const handleDummyDataSubmit = (patternKey: DummyDataPatternKey) => {
-        const pattern = DUMMY_DATA_PATTERNS[patternKey];
-        onNext({
-            companyName: pattern.companyName,
-            taxationPeriod: pattern.taxationPeriod,
-            previousPeriod: pattern.previousPeriod,
-            capital: pattern.capital,
-            issuedShares: pattern.issuedShares,
-        }, patternKey);
+        }, selectedDummyPattern);
     };
 
     return (
@@ -82,13 +73,13 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
             <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 space-y-3">
                 <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-amber-900">テスト用ダミーデータ</span>
-                    <span className="text-xs text-amber-700">（動作確認用のサンプルデータを自動入力して次のステップへ進みます）</span>
+                    <span className="text-xs text-amber-700">（動作確認用のサンプルデータを自動入力します）</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => handleDummyDataSubmit("pattern1")}
+                        onClick={() => loadDummyData("pattern1")}
                         className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-bold"
                     >
                         パターン1: 中会社（製造業）
@@ -96,7 +87,7 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => handleDummyDataSubmit("pattern2")}
+                        onClick={() => loadDummyData("pattern2")}
                         className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-bold"
                     >
                         パターン2: 小会社（小売業）
@@ -104,7 +95,7 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
                     <Button
                         type="button"
                         variant="outline"
-                        onClick={() => handleDummyDataSubmit("pattern3")}
+                        onClick={() => loadDummyData("pattern3")}
                         className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-bold"
                     >
                         パターン3: 大会社（卸売業）

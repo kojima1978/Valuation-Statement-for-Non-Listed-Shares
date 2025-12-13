@@ -15,6 +15,9 @@ interface Step3Props {
 }
 
 export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3Props) {
+    const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">("auto");
+    const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("c1");
+    const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("c2");
     const [formData, setFormData] = useState({
         // Dividends (Total Amount in Thousand Yen)
         ownDividendPrev: defaultValues?.ownDividendPrev?.toString() || "",
@@ -75,7 +78,20 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
         const profitPerSharePrev = profitPrevAmount / shareCount50;
         const profitPerShareAvg = ((profitPrevAmount + profit2PrevAmount) / 2) / shareCount50;
 
-        const ownProfit = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
+        // Calculate individual profit values
+        const profitC1Value = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
+        const profitC2Value = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
+
+        // c: Main profit value based on selection
+        let ownProfit: number;
+        if (profitMethodC === "c1") {
+            ownProfit = profitC1Value;
+        } else if (profitMethodC === "c2") {
+            ownProfit = profitC2Value;
+        } else {
+            // auto: 最も低い値を自動選択
+            ownProfit = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
+        }
 
         // 3. Book Value (d) - Last Period Only (Capital + Retained Earnings)
         const cap1 = Number(formData.ownCapitalPrev);
@@ -88,11 +104,57 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
         const rawOwnBookValue = netAssetPrev / shareCount50;
         const ownBookValue = Math.floor(rawOwnBookValue);
 
+        // Additional calculations for b1, b2, c1, c2, d1, d2
+        // b1: (直前期 + 2期前) ÷ 2 (same as ownDividends)
+        const ownDividendsB1 = ownDividends;
+
+        // b2: (2期前 + 3期前) ÷ 2
+        const avgDivTotalB2 = ((div2Prev + div3Prev) * 1000) / 2;
+        const rawOwnDividendsB2 = avgDivTotalB2 / shareCount50;
+        const ownDividendsB2 = Math.floor(rawOwnDividendsB2 * 10) / 10;
+
+        // c1: Based on user selection
+        let ownProfitC1: number;
+        if (profitMethodC1 === "c1") {
+            ownProfitC1 = profitC1Value;
+        } else if (profitMethodC1 === "c2") {
+            ownProfitC1 = profitC2Value;
+        } else {
+            // auto: デフォルトでc1（直前期）
+            ownProfitC1 = profitC1Value;
+        }
+
+        // c2: Based on user selection
+        let ownProfitC2: number;
+        if (profitMethodC2 === "c1") {
+            ownProfitC2 = profitC1Value;
+        } else if (profitMethodC2 === "c2") {
+            ownProfitC2 = profitC2Value;
+        } else {
+            // auto: デフォルトでc2（2年平均）
+            ownProfitC2 = profitC2Value;
+        }
+
+        // d1: 直前期の純資産価額 (same as ownBookValue)
+        const ownBookValueD1 = ownBookValue;
+
+        // d2: 2期前の純資産価額
+        const netAsset2Prev = (cap2 + re2) * 1000;
+        const rawOwnBookValueD2 = netAsset2Prev / shareCount50;
+        const ownBookValueD2 = Math.floor(rawOwnBookValueD2);
+
         onNext({
             // Results
             ownDividends,
             ownProfit,
             ownBookValue,
+            // Additional Results (b1, b2, c1, c2, d1, d2)
+            ownDividendsB1,
+            ownDividendsB2,
+            ownProfitC1,
+            ownProfitC2,
+            ownBookValueD1,
+            ownBookValueD2,
             // Raw Data for Persistence
             ownDividendPrev: divPrev,
             ownDividend2Prev: div2Prev,
@@ -206,8 +268,128 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                         </div>
 
                         {/* Profit */}
-                        <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
+                        <div className="space-y-3 bg-primary/5 p-4 rounded-lg">
                             <Label>利益金額 (c)</Label>
+
+                            {/* Selection for c */}
+                            <div className="flex items-center gap-2 text-xs">
+                                <span className="text-muted-foreground min-w-[60px]">c の選択:</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC("auto")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC === "auto"
+                                                ? "bg-primary text-white"
+                                                : "bg-white text-muted-foreground hover:bg-primary/10"
+                                        }`}
+                                    >
+                                        自動
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC("c1")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC === "c1"
+                                                ? "bg-primary text-white"
+                                                : "bg-white text-muted-foreground hover:bg-primary/10"
+                                        }`}
+                                    >
+                                        直前
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC("c2")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC === "c2"
+                                                ? "bg-primary text-white"
+                                                : "bg-white text-muted-foreground hover:bg-primary/10"
+                                        }`}
+                                    >
+                                        2年平均
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Selection for c1 */}
+                            <div className="flex items-center gap-2 text-xs">
+                                <span className="text-muted-foreground min-w-[60px]">c1 の選択:</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC1("auto")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC1 === "auto"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-white text-muted-foreground hover:bg-green-100"
+                                        }`}
+                                    >
+                                        自動
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC1("c1")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC1 === "c1"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-white text-muted-foreground hover:bg-green-100"
+                                        }`}
+                                    >
+                                        直前
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC1("c2")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC1 === "c2"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-white text-muted-foreground hover:bg-green-100"
+                                        }`}
+                                    >
+                                        2年平均
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Selection for c2 */}
+                            <div className="flex items-center gap-2 text-xs">
+                                <span className="text-muted-foreground min-w-[60px]">c2 の選択:</span>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC2("auto")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC2 === "auto"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-white text-muted-foreground hover:bg-green-100"
+                                        }`}
+                                    >
+                                        自動
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC2("c1")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC2 === "c1"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-white text-muted-foreground hover:bg-green-100"
+                                        }`}
+                                    >
+                                        直前
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProfitMethodC2("c2")}
+                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                            profitMethodC2 === "c2"
+                                                ? "bg-green-600 text-white"
+                                                : "bg-white text-muted-foreground hover:bg-green-100"
+                                        }`}
+                                    >
+                                        2年平均
+                                    </button>
+                                </div>
+                            </div>
 
                             <div className="grid grid-cols-3 gap-4">
                                 {/* Last Year */}
@@ -228,7 +410,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金</Label>
+                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
                                         <div className="relative">
                                             <NumberInput
                                                 name="ownCarryForwardLossPrev"
@@ -261,7 +443,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金</Label>
+                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
                                         <div className="relative">
                                             <NumberInput
                                                 name="ownCarryForwardLoss2Prev"
@@ -294,7 +476,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                         </div>
                                     </div>
                                     <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金</Label>
+                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
                                         <div className="relative">
                                             <NumberInput
                                                 name="ownCarryForwardLoss3Prev"
@@ -412,49 +594,166 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                 const profitPerSharePrev = p1Val / shareCount50;
                                 const profitPerShareAvg = ((p1Val + p2Val) / 2) / shareCount50;
 
-                                const c = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
-                                // actually calculateOwnFinancials returns raw.
+                                // Calculate individual profit values
+                                const profitC1Val = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
+                                const profitC2Val = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
+
+                                // c: Main profit value based on selection
+                                let c: number;
+                                let cMethod: string;
+                                if (profitMethodC === "c1") {
+                                    c = profitC1Val;
+                                    cMethod = "直前";
+                                } else if (profitMethodC === "c2") {
+                                    c = profitC2Val;
+                                    cMethod = "2年平均";
+                                } else {
+                                    c = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
+                                    cMethod = "自動";
+                                }
+
+                                // c1 based on selection
+                                let c1Display: number;
+                                let c1Method: string;
+                                if (profitMethodC1 === "c1") {
+                                    c1Display = profitC1Val;
+                                    c1Method = "直前";
+                                } else if (profitMethodC1 === "c2") {
+                                    c1Display = profitC2Val;
+                                    c1Method = "2年平均";
+                                } else {
+                                    c1Display = profitC1Val; // デフォルトc1
+                                    c1Method = "自動";
+                                }
+
+                                // c2 based on selection
+                                let c2Display: number;
+                                let c2Method: string;
+                                if (profitMethodC2 === "c1") {
+                                    c2Display = profitC1Val;
+                                    c2Method = "直前";
+                                } else if (profitMethodC2 === "c2") {
+                                    c2Display = profitC2Val;
+                                    c2Method = "2年平均";
+                                } else {
+                                    c2Display = profitC2Val; // デフォルトc2
+                                    c2Method = "自動";
+                                }
 
                                 // d: Book Value - Last Period Only
                                 const bv1 = (Number(formData.ownCapitalPrev) + Number(formData.ownRetainedEarningsPrev)) * 1000;
                                 const d = Math.floor(bv1 / shareCount50);
 
+                                // Additional calculations
+                                const b1 = b; // (直前期 + 2期前) ÷ 2
+                                const b2Avg = ((Number(formData.ownDividend2Prev) + Number(formData.ownDividend3Prev)) * 1000) / 2;
+                                const b2 = Math.floor((b2Avg / shareCount50) * 10) / 10;
+
+                                // Use the display values calculated above
+                                const c1 = c1Display;
+                                const c2 = c2Display;
+
+                                const d1 = d; // 直前期
+                                const bv2 = (Number(formData.ownCapital2Prev) + Number(formData.ownRetainedEarnings2Prev)) * 1000;
+                                const d2 = Math.floor(bv2 / shareCount50);
+
                                 return (
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground whitespace-nowrap">1株当たりの配当金額 (b)</span>
+                                    <div className="space-y-4">
+                                        {/* 上段: b, c, d */}
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground whitespace-nowrap">1株当たりの配当金額 (b)</span>
 
-                                            <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
-                                                ({Number(formData.ownDividendPrev).toLocaleString()} + {Number(formData.ownDividend2Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
+                                                <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
+                                                    ({Number(formData.ownDividendPrev).toLocaleString()} + {Number(formData.ownDividend2Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
+                                                </div>
+
+                                                <div className="text-right whitespace-nowrap">
+                                                    <span className="font-bold">{b.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                                                    <span className="text-xs ml-1 text-muted-foreground">円</span>
+                                                </div>
                                             </div>
 
-                                            <div className="text-right whitespace-nowrap">
-                                                <span className="font-bold">{b.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-                                                <span className="text-xs ml-1 text-muted-foreground">円</span>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground whitespace-nowrap">1株当たりの利益金額 (c)</span>
+
+                                                <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
+                                                    {cMethod}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                </div>
+
+                                                <div className="text-right whitespace-nowrap">
+                                                    <span className="font-bold">{c.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                                                    <span className="text-xs ml-1 text-muted-foreground">円</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-muted-foreground whitespace-nowrap">1株当たりの純資産価額 (d)</span>
+
+                                                <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
+                                                    ({Number(formData.ownCapitalPrev).toLocaleString()} + {Number(formData.ownRetainedEarningsPrev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                </div>
+
+                                                <div className="text-right whitespace-nowrap">
+                                                    <span className="font-bold">{d.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                                                    <span className="text-xs ml-1 text-muted-foreground">円</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground whitespace-nowrap">1株当たりの利益金額 (c)</span>
 
-                                            <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
-                                                Min(直前:{(p1Val / 1000).toLocaleString()}, 平均:{((p1Val + p2Val) / 2000).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
+                                        {/* 下段: b1, b2, c1, c2, d1, d2 */}
+                                        <div className="border-t border-dashed border-primary/20 pt-3 space-y-2">
+                                            <h5 className="text-xs font-semibold text-black mb-2">比準要素数1の会社・比準要素数0の会社の判定要素</h5>
+
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
+                                                    <span className="text-black whitespace-nowrap">b1:</span>
+                                                    <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
+                                                        ({Number(formData.ownDividendPrev).toLocaleString()} + {Number(formData.ownDividend2Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
+                                                    </div>
+                                                    <span className="font-semibold text-black whitespace-nowrap">{b1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
+                                                    <span className="text-black whitespace-nowrap">b2:</span>
+                                                    <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
+                                                        ({Number(formData.ownDividend2Prev).toLocaleString()} + {Number(formData.ownDividend3Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
+                                                    </div>
+                                                    <span className="font-semibold text-black whitespace-nowrap">{b2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                </div>
                                             </div>
 
-                                            <div className="text-right whitespace-nowrap">
-                                                <span className="font-bold">{c.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-                                                <span className="text-xs ml-1 text-muted-foreground">円</span>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
+                                                    <span className="text-black whitespace-nowrap">c1:</span>
+                                                    <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
+                                                        {c1Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                    </div>
+                                                    <span className="font-semibold text-black whitespace-nowrap">{c1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
+                                                    <span className="text-black whitespace-nowrap">c2:</span>
+                                                    <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
+                                                        {c2Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                    </div>
+                                                    <span className="font-semibold text-black whitespace-nowrap">{c2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-muted-foreground whitespace-nowrap">1株当たりの純資産価額 (d)</span>
 
-                                            <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
-                                                ({Number(formData.ownCapitalPrev).toLocaleString()} + {Number(formData.ownRetainedEarningsPrev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
-                                            </div>
-
-                                            <div className="text-right whitespace-nowrap">
-                                                <span className="font-bold">{d.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
-                                                <span className="text-xs ml-1 text-muted-foreground">円</span>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
+                                                    <span className="text-black whitespace-nowrap">d1:</span>
+                                                    <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
+                                                        ({Number(formData.ownCapitalPrev).toLocaleString()} + {Number(formData.ownRetainedEarningsPrev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                    </div>
+                                                    <span className="font-semibold text-black whitespace-nowrap">{d1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
+                                                    <span className="text-black whitespace-nowrap">d2:</span>
+                                                    <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
+                                                        ({Number(formData.ownCapital2Prev).toLocaleString()} + {Number(formData.ownRetainedEarnings2Prev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                    </div>
+                                                    <span className="font-semibold text-black whitespace-nowrap">{d2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                </div>
                                             </div>
                                         </div>
 
