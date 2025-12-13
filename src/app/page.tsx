@@ -15,21 +15,39 @@ export default function Home() {
         </p>
       </div>
 
-      <Card className="p-8 max-w-md w-full text-center space-y-6 border-4 border-secondary/20 shadow-xl">
-        <div className="space-y-2">
-          <h2 className="text-xl font-bold text-foreground">評価をはじめる</h2>
-          <p className="text-sm text-muted-foreground">
-            会社規模の判定から評価額の算出まで、<br />
-            ステップ形式で進めます。
-          </p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full px-4">
+        <Card className="p-8 text-center space-y-6 border-4 border-secondary/20 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-foreground">ステップバイステップ</h2>
+            <p className="text-sm text-muted-foreground">
+              会社規模の判定から評価額の算出まで、<br />
+              ステップ形式でガイド付きで進めます。
+            </p>
+          </div>
 
-        <Link href="/valuation" className="w-full">
-          <Button size="lg" className="w-full text-lg shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
-            スタート！
-          </Button>
-        </Link>
-      </Card>
+          <Link href="/valuation?mode=step" className="w-full">
+            <Button size="lg" className="w-full text-lg shadow-lg hover:shadow-xl transition-all">
+              スタート！
+            </Button>
+          </Link>
+        </Card>
+
+        <Card className="p-8 text-center space-y-6 border-4 border-primary/20 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-foreground">一覧入力</h2>
+            <p className="text-sm text-muted-foreground">
+              すべてのデータを一度に入力して、<br />
+              素早く評価額を算出します。
+            </p>
+          </div>
+
+          <Link href="/valuation?mode=bulk" className="w-full">
+            <Button size="lg" className="w-full text-lg shadow-lg hover:shadow-xl transition-all">
+              スタート！
+            </Button>
+          </Link>
+        </Card>
+      </div>
     </div>
   );
 }

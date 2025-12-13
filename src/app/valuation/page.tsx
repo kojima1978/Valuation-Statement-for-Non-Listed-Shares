@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { BasicInfo, Financials } from "@/types/valuation";
 import { Step1BasicInfo } from "@/components/valuation/Step1BasicInfo";
 import { Step2CompanySize } from "@/components/valuation/Step2CompanySize";
@@ -9,7 +10,9 @@ import { Step4IndustryData } from "@/components/valuation/Step4IndustryData";
 import { Step5NetAsset } from "@/components/valuation/Step5NetAsset";
 import { Step6Result } from "@/components/valuation/Step6Result";
 import { Step7Simulation } from "@/components/valuation/Step7Simulation";
+import { BulkInput } from "@/components/valuation/BulkInput";
 import { cn } from "@/lib/utils";
+import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
 
 // Inline Icon
 const CheckIcon = ({ className }: { className?: string }) => (
@@ -37,12 +40,21 @@ const STEPS = [
     { title: "シミュ", description: "利益0仮定" },
 ];
 
-export default function ValuationPage() {
+function ValuationContent() {
+    const searchParams = useSearchParams();
+    const mode = searchParams.get("mode") || "step"; // "step" or "bulk"
+
     const [currentStep, setCurrentStep] = useState(0);
     const [basicInfo, setBasicInfo] = useState<BasicInfo | null>(null);
     const [financials, setFinancials] = useState<Financials | null>(null);
+    const [showResult, setShowResult] = useState(false);
+    const [activeDummyPattern, setActiveDummyPattern] = useState<DummyDataPatternKey | null>(null);
 
-    const handleNextStep1 = (data: Partial<BasicInfo>) => {
+    const handleNextStep1 = (data: Partial<BasicInfo>, dummyDataKey?: DummyDataPatternKey) => {
+        if (dummyDataKey) {
+            // ダミーデータが選択された場合、そのパターンを保存
+            setActiveDummyPattern(dummyDataKey);
+        }
         setBasicInfo((prev) => ({ ...prev, ...data } as BasicInfo));
         setCurrentStep(1);
         window.scrollTo(0, 0);
@@ -70,6 +82,12 @@ export default function ValuationPage() {
         setFinancials((prev) => ({ ...prev, ...data } as Financials));
         setCurrentStep(5);
         window.scrollTo(0, 0);
+    };
+
+    // ダミーデータからデフォルト値を取得するヘルパー関数
+    const getDummyDefaults = () => {
+        if (!activeDummyPattern) return null;
+        return DUMMY_DATA_PATTERNS[activeDummyPattern];
     };
 
     const handleNextStep6 = () => {
@@ -106,8 +124,24 @@ export default function ValuationPage() {
         window.scrollTo(0, 0);
     };
 
+    const handleBulkSubmit = (bulkBasicInfo: BasicInfo, bulkFinancials: Financials) => {
+        setBasicInfo(bulkBasicInfo);
+        setFinancials(bulkFinancials);
+        setShowResult(true);
+        setCurrentStep(5);
+        window.scrollTo(0, 0);
+    };
+
     return (
         <div className="space-y-8 py-8">
+            {/* Bulk Input Mode */}
+            {mode === "bulk" && !showResult && (
+                <BulkInput onSubmit={handleBulkSubmit} />
+            )}
+
+            {/* Step-by-Step Mode or Bulk Result */}
+            {(mode === "step" || showResult) && (
+                <>
             {/* Stepper */}
             <div className="relative">
                 <div className="absolute top-5 left-0 w-full h-1 bg-muted -z-10" />
@@ -175,7 +209,13 @@ export default function ValuationPage() {
                     <Step2CompanySize
                         onNext={handleNextStep2}
                         onBack={handleBack}
-                        defaultValues={basicInfo || undefined}
+                        defaultValues={activeDummyPattern && getDummyDefaults() ? {
+                            ...basicInfo,
+                            employees: getDummyDefaults()!.employees,
+                            totalAssets: getDummyDefaults()!.totalAssets * 1000,
+                            sales: getDummyDefaults()!.sales * 1000,
+                            industryType: getDummyDefaults()!.industryType,
+                        } : basicInfo || undefined}
                     />
                 )}
 
@@ -184,7 +224,22 @@ export default function ValuationPage() {
                         basicInfo={basicInfo}
                         onNext={handleNextStep3}
                         onBack={handleBack}
-                        defaultValues={financials || undefined}
+                        defaultValues={activeDummyPattern && getDummyDefaults() ? {
+                            ...financials,
+                            ownDividendPrev: getDummyDefaults()!.ownDividendPrev,
+                            ownDividend2Prev: getDummyDefaults()!.ownDividend2Prev,
+                            ownDividend3Prev: getDummyDefaults()!.ownDividend3Prev,
+                            ownTaxableIncomePrev: getDummyDefaults()!.ownTaxableIncomePrev,
+                            ownCarryForwardLossPrev: getDummyDefaults()!.ownCarryForwardLossPrev,
+                            ownTaxableIncome2Prev: getDummyDefaults()!.ownTaxableIncome2Prev,
+                            ownCarryForwardLoss2Prev: getDummyDefaults()!.ownCarryForwardLoss2Prev,
+                            ownTaxableIncome3Prev: getDummyDefaults()!.ownTaxableIncome3Prev,
+                            ownCarryForwardLoss3Prev: getDummyDefaults()!.ownCarryForwardLoss3Prev,
+                            ownCapitalPrev: getDummyDefaults()!.ownCapitalPrev,
+                            ownRetainedEarningsPrev: getDummyDefaults()!.ownRetainedEarningsPrev,
+                            ownCapital2Prev: getDummyDefaults()!.ownCapital2Prev,
+                            ownRetainedEarnings2Prev: getDummyDefaults()!.ownRetainedEarnings2Prev,
+                        } : financials || undefined}
                     />
                 )}
 
@@ -193,7 +248,16 @@ export default function ValuationPage() {
                         basicInfo={basicInfo}
                         onNext={handleNextStep4}
                         onBack={handleBack}
-                        defaultValues={financials || undefined}
+                        defaultValues={activeDummyPattern && getDummyDefaults() ? {
+                            ...financials,
+                            industryStockPriceCurrent: getDummyDefaults()!.industryStockPriceCurrent,
+                            industryStockPrice1MonthBefore: getDummyDefaults()!.industryStockPrice1MonthBefore,
+                            industryStockPrice2MonthsBefore: getDummyDefaults()!.industryStockPrice2MonthsBefore,
+                            industryStockPricePrevYearAverage: getDummyDefaults()!.industryStockPricePrevYearAverage,
+                            industryDividends: getDummyDefaults()!.industryDividendsYen + (getDummyDefaults()!.industryDividendsSen * 0.1),
+                            industryProfit: getDummyDefaults()!.industryProfit,
+                            industryBookValue: getDummyDefaults()!.industryBookValue,
+                        } : financials || undefined}
                     />
                 )}
 
@@ -202,7 +266,13 @@ export default function ValuationPage() {
                         basicInfo={basicInfo}
                         onNext={handleNextStep5}
                         onBack={handleBack}
-                        defaultValues={financials || undefined}
+                        defaultValues={activeDummyPattern && getDummyDefaults() ? {
+                            ...financials,
+                            assetsBookValue: getDummyDefaults()!.assetsBookValue * 1000,
+                            assetsInheritanceValue: getDummyDefaults()!.assetsInheritanceValue * 1000,
+                            liabilitiesBookValue: getDummyDefaults()!.liabilitiesBookValue * 1000,
+                            liabilitiesInheritanceValue: getDummyDefaults()!.liabilitiesInheritanceValue * 1000,
+                        } : financials || undefined}
                     />
                 )}
 
@@ -223,6 +293,16 @@ export default function ValuationPage() {
                     />
                 )}
             </div>
+            </>
+            )}
         </div>
+    );
+}
+
+export default function ValuationPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center min-h-screen">読み込み中...</div>}>
+            <ValuationContent />
+        </Suspense>
     );
 }

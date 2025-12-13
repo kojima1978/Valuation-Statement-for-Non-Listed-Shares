@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/Input";
 import { NumberInput } from "@/components/ui/NumberInput";
 import { Label } from "@/components/ui/Label";
 import { Card } from "@/components/ui/Card";
+import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
 
 interface Step1Props {
-    onNext: (data: Partial<BasicInfo>) => void;
+    onNext: (data: Partial<BasicInfo>, dummyDataKey?: DummyDataPatternKey) => void;
     defaultValues?: Partial<BasicInfo>;
 }
 
@@ -27,7 +28,18 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const loadDummyData = (patternKey: DummyDataPatternKey) => {
+        const pattern = DUMMY_DATA_PATTERNS[patternKey];
+        setFormData({
+            companyName: pattern.companyName,
+            taxationPeriod: pattern.taxationPeriod,
+            previousPeriod: pattern.previousPeriod,
+            capital: pattern.capital.toString(),
+            issuedShares: pattern.issuedShares.toString(),
+        });
+    };
+
+    const handleSubmit = (e: React.FormEvent, dummyDataKey?: DummyDataPatternKey) => {
         e.preventDefault();
 
         // Parse numbers
@@ -45,7 +57,18 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
             previousPeriod: formData.previousPeriod,
             capital,
             issuedShares,
-        });
+        }, dummyDataKey);
+    };
+
+    const handleDummyDataSubmit = (patternKey: DummyDataPatternKey) => {
+        const pattern = DUMMY_DATA_PATTERNS[patternKey];
+        onNext({
+            companyName: pattern.companyName,
+            taxationPeriod: pattern.taxationPeriod,
+            previousPeriod: pattern.previousPeriod,
+            capital: pattern.capital,
+            issuedShares: pattern.issuedShares,
+        }, patternKey);
     };
 
     return (
@@ -53,6 +76,40 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
             <div className="text-center space-y-2">
                 <h2 className="text-2xl font-black text-primary">基本情報の入力 (Step 1/4)</h2>
                 <p className="text-muted-foreground">会社名や評価時期などの基本情報を入力します。</p>
+            </div>
+
+            {/* ダミーデータ読み込みボタン */}
+            <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-amber-900">テスト用ダミーデータ</span>
+                    <span className="text-xs text-amber-700">（動作確認用のサンプルデータを自動入力して次のステップへ進みます）</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleDummyDataSubmit("pattern1")}
+                        className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-bold"
+                    >
+                        パターン1: 中会社（製造業）
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleDummyDataSubmit("pattern2")}
+                        className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-bold"
+                    >
+                        パターン2: 小会社（小売業）
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleDummyDataSubmit("pattern3")}
+                        className="bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-bold"
+                    >
+                        パターン3: 大会社（卸売業）
+                    </Button>
+                </div>
             </div>
 
             <Card className="p-6 border-secondary/20 shadow-lg">
