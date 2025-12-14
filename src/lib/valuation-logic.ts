@@ -161,10 +161,12 @@ export function calculateDetailedSimilarIndustryMethod(
 
     // Check if denominators are valid (not zero)
     if (B !== 0 && C !== 0 && D !== 0) {
-        ratioB = b / B;
-        ratioC = c / C;
-        ratioD = d / D;
-        avgRatio = (ratioB + ratioC + ratioD) / 3;
+        // 小数点以下2位未満を切り捨て
+        ratioB = Math.floor((b / B) * 100) / 100;
+        ratioC = Math.floor((c / C) * 100) / 100;
+        ratioD = Math.floor((d / D) * 100) / 100;
+        // 比準割合（平均比率）も小数点以下2位未満を切り捨て
+        avgRatio = Math.floor(((ratioB + ratioC + ratioD) / 3) * 100) / 100;
 
         // Raw S_50 (Not floored yet)
         S_50_Raw = A * avgRatio * multiplier;
@@ -289,7 +291,12 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
     const assetsInheritanceValue = financials.assetsInheritanceValue ?? assetsBookValue;
     const liabilitiesInheritanceValue = financials.liabilitiesInheritanceValue ?? liabilitiesBookValue;
 
-    const { issuedShares, lRatio, size, sizeMultiplier } = basicInfo;
+    let { issuedShares, lRatio, size, sizeMultiplier } = basicInfo;
+
+    // 比準要素数0の会社の場合、L=0として扱う（純資産価額のみで評価）
+    if (financials.isZeroElementCompany) {
+        lRatio = 0.00;
+    }
 
     // 1. Net Asset Value per Share (N)
     const netInh = assetsInheritanceValue - liabilitiesInheritanceValue;

@@ -18,6 +18,10 @@ interface BulkInputProps {
 }
 
 export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancials }: BulkInputProps) {
+  const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">("auto");
+  const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("c1");
+  const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("c2");
+
   const [formData, setFormData] = useState({
     // Step 1: 基礎情報
     companyName: "",
@@ -67,6 +71,11 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
   // Update formData when props change
   useEffect(() => {
     if (defaultBasicInfo || defaultFinancials) {
+      // Update profit method selections if available
+      if (defaultFinancials?.profitMethodC) setProfitMethodC(defaultFinancials.profitMethodC);
+      if (defaultFinancials?.profitMethodC1) setProfitMethodC1(defaultFinancials.profitMethodC1);
+      if (defaultFinancials?.profitMethodC2) setProfitMethodC2(defaultFinancials.profitMethodC2);
+
       setFormData({
         // Step 1: 基礎情報
         companyName: defaultBasicInfo?.companyName || "",
@@ -224,7 +233,20 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
     const profitPerSharePrev = profitPrevAmount / shareCount50;
     const profitPerShareAvg = ((profitPrevAmount + profit2PrevAmount) / 2) / shareCount50;
 
-    const ownProfit = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
+    // Calculate individual profit values
+    const profitC1Value = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
+    const profitC2Value = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
+
+    // c: Main profit value based on selection
+    let ownProfit: number;
+    if (profitMethodC === "c1") {
+      ownProfit = profitC1Value;
+    } else if (profitMethodC === "c2") {
+      ownProfit = profitC2Value;
+    } else {
+      // auto: 最も低い値を自動選択
+      ownProfit = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
+    }
 
     // 純資産価額（d）
     const cap1 = Number(formData.ownCapitalPrev);
@@ -235,6 +257,48 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
     const netAssetPrev = (cap1 + re1) * 1000;
     const rawOwnBookValue = netAssetPrev / shareCount50;
     const ownBookValue = Math.floor(rawOwnBookValue);
+
+    // Additional calculations for b1, b2, c1, c2, d1, d2
+    // b1: (直前期 + 2期前) ÷ 2 (same as ownDividends)
+    const ownDividendsB1 = ownDividends;
+
+    // b2: (2期前 + 3期前) ÷ 2
+    const avgDivTotalB2 = ((div2Prev + div3Prev) * 1000) / 2;
+    const rawOwnDividendsB2 = avgDivTotalB2 / shareCount50;
+    const ownDividendsB2 = Math.floor(rawOwnDividendsB2 * 10) / 10;
+
+    // c1: Based on user selection
+    let ownProfitC1: number;
+    if (profitMethodC1 === "c1") {
+      ownProfitC1 = profitC1Value;
+    } else if (profitMethodC1 === "c2") {
+      ownProfitC1 = profitC2Value;
+    } else {
+      // auto: デフォルトでc1（直前期）
+      ownProfitC1 = profitC1Value;
+    }
+
+    // c2: Based on user selection
+    let ownProfitC2: number;
+    if (profitMethodC2 === "c1") {
+      ownProfitC2 = profitC1Value;
+    } else if (profitMethodC2 === "c2") {
+      ownProfitC2 = profitC2Value;
+    } else {
+      // auto: デフォルトでc2（2年平均）
+      ownProfitC2 = profitC2Value;
+    }
+
+    // d1: 直前期の純資産価額 (same as ownBookValue)
+    const ownBookValueD1 = ownBookValue;
+
+    // d2: 2期前の純資産価額
+    const netAsset2Prev = (cap2 + re2) * 1000;
+    const rawOwnBookValueD2 = netAsset2Prev / shareCount50;
+    const ownBookValueD2 = Math.floor(rawOwnBookValueD2);
+
+    // 比準要素数0の会社の判定: b1, c1, c2 がすべて0の場合
+    const isZeroElementCompany = ownDividendsB1 === 0 && ownProfitC1 === 0 && ownProfitC2 === 0;
 
     // Step 4: 類似業種データ
     const industryStockPriceCurrent = Number(formData.industryStockPriceCurrent);
@@ -260,6 +324,19 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
       ownDividends,
       ownProfit,
       ownBookValue,
+      // Additional Results (b1, b2, c1, c2, d1, d2)
+      ownDividendsB1,
+      ownDividendsB2,
+      ownProfitC1,
+      ownProfitC2,
+      ownBookValueD1,
+      ownBookValueD2,
+      // Special classification
+      isZeroElementCompany,
+      // Profit calculation method selections
+      profitMethodC,
+      profitMethodC1,
+      profitMethodC2,
 
       // 自社データの保存用
       ownDividendPrev: divPrev,
@@ -558,8 +635,129 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>利益金額（千円）</Label>
+
+            {/* Selection for c */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground min-w-[60px]">c の選択:</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC("auto")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC === "auto"
+                      ? "bg-primary text-white"
+                      : "bg-white text-muted-foreground hover:bg-primary/10"
+                  }`}
+                >
+                  自動
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC("c1")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC === "c1"
+                      ? "bg-primary text-white"
+                      : "bg-white text-muted-foreground hover:bg-primary/10"
+                  }`}
+                >
+                  直前
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC("c2")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC === "c2"
+                      ? "bg-primary text-white"
+                      : "bg-white text-muted-foreground hover:bg-primary/10"
+                  }`}
+                >
+                  2年平均
+                </button>
+              </div>
+            </div>
+
+            {/* Selection for c1 */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground min-w-[60px]">c1 の選択:</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC1("auto")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC1 === "auto"
+                      ? "bg-green-600 text-white"
+                      : "bg-white text-muted-foreground hover:bg-green-100"
+                  }`}
+                >
+                  自動
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC1("c1")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC1 === "c1"
+                      ? "bg-green-600 text-white"
+                      : "bg-white text-muted-foreground hover:bg-green-100"
+                  }`}
+                >
+                  直前
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC1("c2")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC1 === "c2"
+                      ? "bg-green-600 text-white"
+                      : "bg-white text-muted-foreground hover:bg-green-100"
+                  }`}
+                >
+                  2年平均
+                </button>
+              </div>
+            </div>
+
+            {/* Selection for c2 */}
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-muted-foreground min-w-[60px]">c2 の選択:</span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC2("auto")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC2 === "auto"
+                      ? "bg-green-600 text-white"
+                      : "bg-white text-muted-foreground hover:bg-green-100"
+                  }`}
+                >
+                  自動
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC2("c1")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC2 === "c1"
+                      ? "bg-green-600 text-white"
+                      : "bg-white text-muted-foreground hover:bg-green-100"
+                  }`}
+                >
+                  直前
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setProfitMethodC2("c2")}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    profitMethodC2 === "c2"
+                      ? "bg-green-600 text-white"
+                      : "bg-white text-muted-foreground hover:bg-green-100"
+                  }`}
+                >
+                  2年平均
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label className="text-xs font-bold text-center block">直前期</Label>

@@ -184,6 +184,24 @@ export function Step5NetAsset({ basicInfo, onBack, onNext, defaultValues }: Step
                                 </span>
                             </div>
                             <div className="flex items-center justify-between border-b border-primary/10 pb-2">
+                                <span className="text-sm text-muted-foreground">評価差額に相当する金額</span>
+                                <span className="font-bold">
+                                    {(() => {
+                                        const assetsInh = Number(formData.assetsInheritanceValue) * 1000;
+                                        const liabInh = Number(formData.liabilitiesInheritanceValue) * 1000;
+                                        const netInh = assetsInh - liabInh;
+
+                                        const assetsBook = Number(formData.assetsBookValue) * 1000;
+                                        const liabBook = Number(formData.liabilitiesBookValue) * 1000;
+                                        const netBook = assetsBook - liabBook;
+
+                                        const diff = netInh - netBook;
+                                        if (diff <= 0) return "0";
+                                        return diff.toLocaleString();
+                                    })()} 円
+                                </span>
+                            </div>
+                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
                                 <span className="text-sm text-muted-foreground">評価差額に対する法人税額等 (37%)</span>
                                 <span className="font-bold text-red-500">
                                     ▲ {(() => {
@@ -202,9 +220,31 @@ export function Step5NetAsset({ basicInfo, onBack, onNext, defaultValues }: Step
                                 </span>
                             </div>
 
+                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
+                                <span className="text-sm text-muted-foreground">相続税評価額ベースの純資産（法人税額控除後）</span>
+                                <span className="font-bold text-foreground">
+                                    {(() => {
+                                        const assetsInh = Number(formData.assetsInheritanceValue) * 1000;
+                                        const liabInh = Number(formData.liabilitiesInheritanceValue) * 1000;
+                                        const netInh = assetsInh - liabInh;
+
+                                        const assetsBook = Number(formData.assetsBookValue) * 1000;
+                                        const liabBook = Number(formData.liabilitiesBookValue) * 1000;
+                                        const netBook = assetsBook - liabBook;
+
+                                        const diff = netInh - netBook;
+                                        const tax = diff > 0 ? Math.floor(diff * 0.37) : 0;
+                                        const netAfterTax = netInh - tax;
+
+                                        return netAfterTax.toLocaleString();
+                                    })()} 円
+                                </span>
+                            </div>
+
                             <div className="flex items-center justify-between pt-2">
                                 <div className="space-y-1">
                                     <p className="text-sm text-muted-foreground">1株あたりの純資産価額</p>
+                                    <p className="text-xs text-muted-foreground">相続税評価額ベースの純資産（法人税額控除後）÷発行済株式数</p>
                                     <p className="text-xs text-muted-foreground">(発行済株式数: {basicInfo.issuedShares?.toLocaleString() ?? 0}株)</p>
                                 </div>
                                 <p className="text-2xl font-black text-primary">

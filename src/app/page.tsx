@@ -1,8 +1,26 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleStepByStepClick = () => {
+    // sessionStorageをクリア
+    sessionStorage.removeItem('valuationBasicInfo');
+    sessionStorage.removeItem('valuationFinancials');
+    router.push('/valuation?mode=step');
+  };
+
+  const handleBulkInputClick = () => {
+    // sessionStorageをクリア
+    sessionStorage.removeItem('valuationBasicInfo');
+    sessionStorage.removeItem('valuationFinancials');
+    router.push('/valuation?mode=bulk');
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8">
       <div className="text-center space-y-4">
@@ -25,11 +43,13 @@ export default function Home() {
             </p>
           </div>
 
-          <Link href="/valuation?mode=step" className="w-full">
-            <Button size="lg" className="w-full text-lg shadow-lg hover:shadow-xl transition-all">
-              スタート！
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            className="w-full text-lg shadow-lg hover:shadow-xl transition-all"
+            onClick={handleStepByStepClick}
+          >
+            スタート！
+          </Button>
         </Card>
 
         <Card className="p-8 text-center space-y-6 border-4 border-primary/20 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
@@ -41,11 +61,13 @@ export default function Home() {
             </p>
           </div>
 
-          <Link href="/valuation?mode=bulk" className="w-full">
-            <Button size="lg" className="w-full text-lg shadow-lg hover:shadow-xl transition-all">
-              スタート！
-            </Button>
-          </Link>
+          <Button
+            size="lg"
+            className="w-full text-lg shadow-lg hover:shadow-xl transition-all"
+            onClick={handleBulkInputClick}
+          >
+            スタート！
+          </Button>
         </Card>
       </div>
     </div>

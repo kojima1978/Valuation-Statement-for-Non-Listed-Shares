@@ -287,7 +287,7 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
                                     <div className="bg-white/50 p-2 rounded relative overflow-hidden">
                                         <div className="text-muted-foreground">配当比準 (b/B)</div>
                                         <div className="font-bold flex items-center justify-center gap-1">
-                                            {details.ratios.b.toFixed(1)} / {details.ratios.B.toFixed(1)} = {details.ratios.ratioB.toFixed(3)}
+                                            {details.ratios.b.toFixed(1)} / {details.ratios.B.toFixed(1)} = {details.ratios.ratioB.toFixed(2)}
                                             {details.ratios.ratioB > 1 && (
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 animate-pulse">
                                                     <path d="m5 12 7-7 7 7" />
@@ -305,7 +305,7 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
                                     <div className="bg-white/50 p-2 rounded relative overflow-hidden">
                                         <div className="text-muted-foreground">利益比準 (c/C)</div>
                                         <div className="font-bold flex items-center justify-center gap-1">
-                                            {details.ratios.c.toFixed(0)} / {details.ratios.C.toFixed(0)} = {details.ratios.ratioC.toFixed(3)}
+                                            {details.ratios.c.toFixed(0)} / {details.ratios.C.toFixed(0)} = {details.ratios.ratioC.toFixed(2)}
                                             {details.ratios.ratioC > 1 && (
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 animate-pulse">
                                                     <path d="m5 12 7-7 7 7" />
@@ -323,7 +323,7 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
                                     <div className="bg-white/50 p-2 rounded relative overflow-hidden">
                                         <div className="text-muted-foreground">純資産比準 (d/D)</div>
                                         <div className="font-bold flex items-center justify-center gap-1">
-                                            {details.ratios.d.toFixed(0)} / {details.ratios.D.toFixed(0)} = {details.ratios.ratioD.toFixed(3)}
+                                            {details.ratios.d.toFixed(0)} / {details.ratios.D.toFixed(0)} = {details.ratios.ratioD.toFixed(2)}
                                             {details.ratios.ratioD > 1 && (
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 animate-pulse">
                                                     <path d="m5 12 7-7 7 7" />
@@ -341,14 +341,50 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
                                 </div>
 
                                 <div className="flex items-center justify-center text-xs text-muted-foreground gap-2">
-                                    <span>比準割合: {details.ratios.avgRatio.toFixed(3)}</span>
+                                    <span>比準割合: {details.ratios.avgRatio.toFixed(2)}</span>
+                                </div>
+
+                                {/* 会社規模に応じた斟酌率の表示 */}
+                                <div className="mt-3 mb-2 p-3 bg-white/50 rounded-lg border border-primary/10">
+                                    <div className="text-xs font-semibold text-muted-foreground mb-2 text-center">会社規模に応じた斟酌率</div>
+                                    <div className="grid grid-cols-3 gap-2 text-xs">
+                                        <div className={`p-2 rounded text-center transition-all ${basicInfo.size === 'Big' ? 'bg-primary/20 text-primary font-semibold border border-primary/30' : 'bg-white/30 text-gray-400 border border-gray-200'}`}>
+                                            <div className="font-normal text-xs">大会社</div>
+                                            <div className="mt-1">0.7</div>
+                                        </div>
+                                        <div className={`p-2 rounded text-center transition-all ${basicInfo.size === 'Medium' ? 'bg-primary/20 text-primary font-semibold border border-primary/30' : 'bg-white/30 text-gray-400 border border-gray-200'}`}>
+                                            <div className="font-normal text-xs">中会社</div>
+                                            <div className="mt-1">0.6</div>
+                                        </div>
+                                        <div className={`p-2 rounded text-center transition-all ${basicInfo.size === 'Small' ? 'bg-primary/20 text-primary font-semibold border border-primary/30' : 'bg-white/30 text-gray-400 border border-gray-200'}`}>
+                                            <div className="font-normal text-xs">小会社</div>
+                                            <div className="mt-1">0.5</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 原株換算 */}
+                                <div className="mb-2 p-3 bg-white/50 rounded-lg border border-primary/10">
+                                    <div className="text-xs font-semibold text-muted-foreground mb-2 text-center">原株換算</div>
+                                    <div className="flex items-center justify-center gap-2 text-xs">
+                                        <span className="text-black">1株当たりの資本金額</span>
+                                        <span className="font-bold text-black">
+                                            {Math.floor(((basicInfo.capital || 0) * 1000) / (basicInfo.issuedShares || 1)).toLocaleString()}円
+                                        </span>
+                                        <span className="text-black">/</span>
+                                        <span className="font-bold text-black">50円</span>
+                                        <span className="text-black">=</span>
+                                        <span className="font-bold text-black">
+                                            {details.conversion.ratio.toLocaleString(undefined, { maximumFractionDigits: 3 })}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center justify-between border-t border-primary/20 pt-2">
                                     <div className="space-y-1">
                                         <p className="text-sm text-muted-foreground">類似業種比準価額</p>
                                         <p className="text-xs text-muted-foreground">
-                                            A({details.A.toLocaleString()}) × 比準割合 × {details.multiplier} × {details.conversion.ratio.toLocaleString(undefined, { maximumFractionDigits: 3 })} (1株資本 {(details.conversion.shareCount50 * 50 / (basicInfo.issuedShares || 1)).toLocaleString()}円 / 50円)
+                                            {details.A.toLocaleString()}(株価) × {details.ratios.avgRatio.toFixed(2)}(比準割合) × {details.multiplier}(斟酌率) × {details.conversion.ratio.toLocaleString(undefined, { maximumFractionDigits: 3 })}(原株換算)
                                         </p>
                                     </div>
                                     <p className="text-2xl font-black text-primary">

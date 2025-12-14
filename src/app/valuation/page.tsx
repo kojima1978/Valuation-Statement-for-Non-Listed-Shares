@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { BasicInfo, Financials } from "@/types/valuation";
 import { Step1BasicInfo } from "@/components/valuation/Step1BasicInfo";
 import { Step2CompanySize } from "@/components/valuation/Step2CompanySize";
@@ -42,6 +42,7 @@ const STEPS = [
 
 function ValuationContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const mode = searchParams.get("mode") || "step"; // "step" or "bulk"
 
     const [currentStep, setCurrentStep] = useState(0);
@@ -151,6 +152,10 @@ function ValuationContent() {
         window.location.href = '/';
     };
 
+    const handleBackToTop = () => {
+        router.push('/');
+    };
+
     return (
         <div className="space-y-8 py-8">
             {/* Bulk Input Mode */}
@@ -225,6 +230,7 @@ function ValuationContent() {
                 {currentStep === 0 && (
                     <Step1BasicInfo
                         onNext={handleNextStep1}
+                        onBack={handleBackToTop}
                         defaultValues={basicInfo || undefined}
                     />
                 )}

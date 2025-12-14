@@ -11,10 +11,11 @@ import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
 
 interface Step1Props {
     onNext: (data: Partial<BasicInfo>, dummyDataKey?: DummyDataPatternKey) => void;
+    onBack?: () => void;
     defaultValues?: Partial<BasicInfo>;
 }
 
-export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
+export function Step1BasicInfo({ onNext, onBack, defaultValues }: Step1Props) {
     const [formData, setFormData] = useState({
         companyName: defaultValues?.companyName || "",
         taxationPeriod: defaultValues?.taxationPeriod || "",
@@ -65,7 +66,7 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">基本情報の入力 (Step 1/4)</h2>
+                <h2 className="text-2xl font-black text-primary">基本情報の入力 (Step 1/6)</h2>
                 <p className="text-muted-foreground">会社名や評価時期などの基本情報を入力します。</p>
             </div>
 
@@ -186,44 +187,67 @@ export function Step1BasicInfo({ onNext, defaultValues }: Step1Props) {
                             </div>
 
                             {/* Calculation Preview */}
-                            {(Number(formData.capital) > 0 && Number(formData.issuedShares) > 0) && (
-                                <div className="space-y-3 bg-white/50 p-4 rounded-lg border border-primary/10 text-sm">
-                                    <h4 className="font-bold text-muted-foreground border-b border-primary/10 pb-1 mb-2">リアルタイムプレビュー</h4>
+                            <div className="space-y-3 bg-white/50 p-4 rounded-lg border border-primary/10 text-sm">
+                                <h4 className="font-bold text-muted-foreground border-b border-primary/10 pb-1 mb-2">リアルタイムプレビュー</h4>
 
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-muted-foreground">1株当たりの資本金額</span>
-                                        <div className="text-right">
-                                            <span className="font-bold">
-                                                {Math.floor((Number(formData.capital) * 1000) / Number(formData.issuedShares)).toLocaleString()}
-                                            </span>
-                                            <span className="text-xs ml-1 text-muted-foreground">円</span>
-                                        </div>
-                                    </div>
-                                    <div className="text-xs text-right text-muted-foreground mb-2">
-                                        計算式: {Number(formData.capital).toLocaleString()}千円 ÷ {Number(formData.issuedShares).toLocaleString()}株
-                                    </div>
-
-                                    <div className="flex justify-between items-center pt-2 border-t border-dashed border-primary/20">
-                                        <span className="text-muted-foreground">1株50円とした場合の発行済株式数</span>
-                                        <div className="text-right">
-                                            <span className="font-bold">
-                                                {Math.floor((Number(formData.capital) * 1000) / 50).toLocaleString()}
-                                            </span>
-                                            <span className="text-xs ml-1 text-muted-foreground">株</span>
-                                        </div>
-                                    </div>
-                                    <div className="text-xs text-right text-muted-foreground">
-                                        計算式: {Number(formData.capital).toLocaleString()}千円 ÷ 50円
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">1株当たりの資本金額</span>
+                                    <div className="text-right">
+                                        <span className="font-bold">
+                                            {(Number(formData.capital) > 0 && Number(formData.issuedShares) > 0)
+                                                ? Math.floor((Number(formData.capital) * 1000) / Number(formData.issuedShares)).toLocaleString()
+                                                : "0"}
+                                        </span>
+                                        <span className="text-xs ml-1 text-muted-foreground">円</span>
                                     </div>
                                 </div>
-                            )}
+                                <div className="text-xs text-right text-muted-foreground mb-2">
+                                    計算式: {Number(formData.capital).toLocaleString()}千円 ÷ {Number(formData.issuedShares).toLocaleString()}株
+                                </div>
+
+                                <div className="flex justify-between items-center pt-2 border-t border-dashed border-primary/20">
+                                    <span className="text-muted-foreground">1株50円とした場合の発行済株式数</span>
+                                    <div className="text-right">
+                                        <span className="font-bold">
+                                            {Number(formData.capital) > 0
+                                                ? Math.floor((Number(formData.capital) * 1000) / 50).toLocaleString()
+                                                : "0"}
+                                        </span>
+                                        <span className="text-xs ml-1 text-muted-foreground">株</span>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-right text-muted-foreground">
+                                    計算式: {Number(formData.capital).toLocaleString()}千円 ÷ 50円
+                                </div>
+
+                                <div className="flex justify-between items-center pt-2 border-t border-dashed border-primary/20">
+                                    <span className="text-muted-foreground">50円株での換算係数</span>
+                                    <div className="text-right">
+                                        <span className="font-bold">
+                                            {(Number(formData.capital) > 0 && Number(formData.issuedShares) > 0)
+                                                ? (Number(formData.issuedShares) / Math.floor((Number(formData.capital) * 1000) / 50)).toLocaleString(undefined, { maximumFractionDigits: 3 })
+                                                : "0"}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="text-xs text-right text-muted-foreground">
+                                    計算式: {Number(formData.issuedShares).toLocaleString()}株 ÷ {Number(formData.capital) > 0 ? Math.floor((Number(formData.capital) * 1000) / 50).toLocaleString() : "0"}株
+                                </div>
+                            </div>
 
                         </div>
                     </div>
 
-                    <Button type="submit" size="lg" className="w-full text-lg mt-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all">
-                        次へ進む
-                    </Button>
+                    <div className="flex gap-4 pt-4">
+                        {onBack && (
+                            <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onBack}>
+                                TOPに戻る
+                            </Button>
+                        )}
+                        <Button type="submit" size="lg" className={`${onBack ? 'flex-[2]' : 'w-full'} text-lg shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all`}>
+                            次へ進む
+                        </Button>
+                    </div>
                 </form >
             </Card >
         </div >

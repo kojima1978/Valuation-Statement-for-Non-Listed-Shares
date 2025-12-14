@@ -15,9 +15,9 @@ interface Step3Props {
 }
 
 export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3Props) {
-    const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">("auto");
-    const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("c1");
-    const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("c2");
+    const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC || "auto");
+    const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC1 || "c1");
+    const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC2 || "c2");
     const [formData, setFormData] = useState({
         // Dividends (Total Amount in Thousand Yen)
         ownDividendPrev: defaultValues?.ownDividendPrev?.toString() || "",
@@ -143,6 +143,9 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
         const rawOwnBookValueD2 = netAsset2Prev / shareCount50;
         const ownBookValueD2 = Math.floor(rawOwnBookValueD2);
 
+        // 比準要素数0の会社の判定: b1, c1, c2 がすべて0の場合
+        const isZeroElementCompany = ownDividendsB1 === 0 && ownProfitC1 === 0 && ownProfitC2 === 0;
+
         onNext({
             // Results
             ownDividends,
@@ -155,6 +158,12 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
             ownProfitC2,
             ownBookValueD1,
             ownBookValueD2,
+            // Special classification
+            isZeroElementCompany,
+            // Profit calculation method selections
+            profitMethodC,
+            profitMethodC1,
+            profitMethodC2,
             // Raw Data for Persistence
             ownDividendPrev: divPrev,
             ownDividend2Prev: div2Prev,
@@ -711,14 +720,14 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownDividendPrev).toLocaleString()} + {Number(formData.ownDividend2Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className="font-semibold text-black whitespace-nowrap">{b1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${b1 === 0 ? 'text-red-600' : 'text-black'}`}>{b1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
                                                     <span className="text-black whitespace-nowrap">b2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownDividend2Prev).toLocaleString()} + {Number(formData.ownDividend3Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className="font-semibold text-black whitespace-nowrap">{b2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${b2 === 0 ? 'text-red-600' : 'text-black'}`}>{b2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                             </div>
 
@@ -728,14 +737,14 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         {c1Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className="font-semibold text-black whitespace-nowrap">{c1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${c1 === 0 ? 'text-red-600' : 'text-black'}`}>{c1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
                                                     <span className="text-black whitespace-nowrap">c2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         {c2Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className="font-semibold text-black whitespace-nowrap">{c2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${c2 === 0 ? 'text-red-600' : 'text-black'}`}>{c2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                             </div>
 
@@ -745,17 +754,29 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownCapitalPrev).toLocaleString()} + {Number(formData.ownRetainedEarningsPrev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className="font-semibold text-black whitespace-nowrap">{d1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${d1 === 0 ? 'text-red-600' : 'text-black'}`}>{d1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
                                                     <span className="text-black whitespace-nowrap">d2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownCapital2Prev).toLocaleString()} + {Number(formData.ownRetainedEarnings2Prev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className="font-semibold text-black whitespace-nowrap">{d2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${d2 === 0 ? 'text-red-600' : 'text-black'}`}>{d2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                             </div>
                                         </div>
+
+                                        {/* 比準要素数0の会社の警告 */}
+                                        {b1 === 0 && c1 === 0 && c2 === 0 && (
+                                            <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-3 mt-3">
+                                                <p className="text-xs font-bold text-amber-900">
+                                                    ⚠️ 比準要素数0の会社 (b1=0, c1=0, c2=0)
+                                                </p>
+                                                <p className="text-[10px] text-amber-800 mt-1">
+                                                    L = 0.00 として純資産価額のみで評価します
+                                                </p>
+                                            </div>
+                                        )}
 
                                         <div className="text-[10px] text-right text-muted-foreground pt-2 border-t border-dashed border-primary/10">
                                             ※ {shareCount50.toLocaleString()}株 (50円換算) で計算

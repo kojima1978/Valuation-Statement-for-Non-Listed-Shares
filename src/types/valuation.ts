@@ -48,6 +48,14 @@ export interface Financials {
     ownBookValueD1?: number; // d1: 直前期の純資産価額
     ownBookValueD2?: number; // d2: 2期前の純資産価額
 
+    // Special company classification
+    isZeroElementCompany?: boolean; // 比準要素数0の会社 (b1=0, c1=0, c2=0)
+
+    // Profit calculation method selections
+    profitMethodC?: "auto" | "c1" | "c2";  // c の選択
+    profitMethodC1?: "auto" | "c1" | "c2"; // c1 の選択
+    profitMethodC2?: "auto" | "c1" | "c2"; // c2 の選択
+
     // Step 3 Raw Inputs (for persistence)
     ownDividendPrev?: number;
     ownDividend2Prev?: number;
