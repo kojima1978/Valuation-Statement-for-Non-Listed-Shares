@@ -153,8 +153,7 @@ export function calculateDetailedSimilarIndustryMethod(
     B: number, C: number, D: number,
     b: number, c: number, d: number,
     multiplier: number,
-    basicInfo: { issuedShares: number },
-    ownCapitalPrev: number // in Thousand Yen (from Step 3 raw data effectively)
+    basicInfo: { issuedShares: number; capital: number }
 ): SimilarIndustryResult {
     let S_50_Raw = 0;
     let ratioB = 0, ratioC = 0, ratioD = 0, avgRatio = 0;
@@ -173,9 +172,10 @@ export function calculateDetailedSimilarIndustryMethod(
     }
 
     // Convert to Actual Share Value
-    const capitalPrevYen = ownCapitalPrev ? ownCapitalPrev * 1000 : 0;
+    // Use basicInfo.capital (資本金等の額) for conversion calculation
+    const capitalYen = (basicInfo.capital || 0) * 1000;
     const issuedShares = basicInfo.issuedShares || 1;
-    const shareCount50 = capitalPrevYen > 0 ? Math.floor(capitalPrevYen / 50) : issuedShares;
+    const shareCount50 = capitalYen > 0 ? Math.floor(capitalYen / 50) : issuedShares;
 
     const conversionRatio = issuedShares > 0 ? shareCount50 / issuedShares : 1;
 
@@ -319,8 +319,7 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
         industryBookValue: D,
         ownDividends: b,
         ownProfit: c,
-        ownBookValue: d,
-        ownCapitalPrev
+        ownBookValue: d
     } = financials;
 
     const possibleAs = [
@@ -338,8 +337,7 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
         A, B, C, D,
         b, c, d,
         multiplier,
-        basicInfo,
-        ownCapitalPrev || 0
+        basicInfo
     );
 
     const comparableValue = simResult.value;
@@ -355,7 +353,26 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
     // Additional info for comparison
     let comparisonDetails: { name: string; value: number }[] = [];
 
-    if (size === "Big") {
+    // 比準要素数0の会社の場合（優先順位1）
+    if (financials.isZeroElementCompany) {
+        finalValue = N;
+        methodDescription = "比準要素数0の会社 (純資産価額)";
+        comparisonDetails = [
+            { name: "比準要素数0", value: Math.floor(N) }
+        ];
+    }
+    // 比準要素数1の会社の場合（優先順位2）
+    else if (financials.isOneElementCompany) {
+        // TODO: 比準要素数1の計算方法は後ほど実装
+        // 現時点では純資産価額を使用
+        finalValue = N;
+        methodDescription = "比準要素数1の会社 (特別計算)";
+        comparisonDetails = [
+            { name: "比準要素数1", value: Math.floor(N) }
+        ];
+    }
+    // 一般の評価会社（優先順位3）
+    else if (size === "Big") {
         if (S < N) {
             finalValue = S;
             methodDescription = "類似業種比準価額 (原則)";
@@ -364,8 +381,7 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
             methodDescription = "純資産価額 (選択)";
         }
         comparisonDetails = [
-            { name: "類似業種比準価額", value: Math.floor(S) },
-            { name: "純資産価額", value: Math.floor(N) }
+            { name: "大会社", value: Math.floor(S) }
         ];
     }
     else if (size === "Medium") {
@@ -377,9 +393,15 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
             finalValue = N;
             methodDescription = "純資産価額 (選択)";
         }
+
+        // L値に応じた表示名を決定
+        let mediumLabel = "中会社";
+        if (L === 0.90) mediumLabel = "中会社 (L=0.9)";
+        else if (L === 0.75) mediumLabel = "中会社 (L=0.75)";
+        else if (L === 0.60) mediumLabel = "中会社 (L=0.6)";
+
         comparisonDetails = [
-            { name: `併用方式 (S×${L}+N×${(1 - L).toFixed(2)})`, value: Math.floor(blended) },
-            { name: "純資産価額", value: Math.floor(N) }
+            { name: mediumLabel, value: Math.floor(blended) }
         ];
     }
     else { // Small
@@ -392,21 +414,25 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
             methodDescription = "併用方式 (L=0.50選択)";
         }
         comparisonDetails = [
-            { name: "純資産価額", value: Math.floor(N) },
-            { name: "併用方式 (L=0.50)", value: Math.floor(blended) }
+            { name: "小会社", value: Math.floor(blended) }
         ];
     }
 
     return {
         finalValue: Math.floor(finalValue),
-        netAssetPerShare: Math.round(N),
-        comparableValue: Math.round(S),
+        netAssetPerShare: Math.floor(N),
+        comparableValue: Math.floor(S),
         methodDescription,
         size,
         lRatio,
         comparisonDetails,
         netAssetDetail: {
             netInh, netBook, tax
-        }
+        },
+        // 計算過程の詳細
+        calculationMethod: financials.isZeroElementCompany ? "比準要素数0" :
+                          financials.isOneElementCompany ? "比準要素数1" :
+                          size === "Big" ? "大会社" :
+                          size === "Medium" ? "中会社" : "小会社"
     };
 }

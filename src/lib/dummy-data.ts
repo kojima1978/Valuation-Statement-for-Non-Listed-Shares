@@ -91,13 +91,13 @@ export const DUMMY_DATA_PATTERNS: Record<string, DummyDataPattern> = {
     issuedShares: 4000,
     employees: 15,
     totalAssets: 180000,  // 1.8億円
-    sales: 450000,  // 4.5億円
+    sales: 45000,  // 0.45億円
     industryType: "RetailService",
     ownDividendPrev: 1200,
     ownDividend2Prev: 1000,
     ownDividend3Prev: 800,
     ownTaxableIncomePrev: 25000,
-    ownCarryForwardLossPrev: 0,
+    ownCarryForwardLossPrev: 10000,
     ownTaxableIncome2Prev: 22000,
     ownCarryForwardLoss2Prev: 0,
     ownTaxableIncome3Prev: 20000,

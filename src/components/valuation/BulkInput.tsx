@@ -19,8 +19,8 @@ interface BulkInputProps {
 
 export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancials }: BulkInputProps) {
   const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">("auto");
-  const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("c1");
-  const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("c2");
+  const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("auto");
+  const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("auto");
 
   const [formData, setFormData] = useState({
     // Step 1: 基礎情報
@@ -990,25 +990,25 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
             <div className="space-y-2">
               <Label>B: 配当金額</Label>
               <div className="flex gap-2">
-                <div className="flex-1">
-                  <Label className="text-xs text-muted-foreground">円</Label>
+                <div className="flex-1 relative">
                   <NumberInput
                     name="industryDividendsYen"
                     value={formData.industryDividendsYen}
                     onChange={handleChange}
                     placeholder="0"
-                    className="text-right"
+                    className="pr-8 text-right"
                   />
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
                 </div>
-                <div className="w-20">
-                  <Label className="text-xs text-muted-foreground">銭</Label>
+                <div className="w-20 relative">
                   <NumberInput
                     name="industryDividendsSen"
                     value={formData.industryDividendsSen}
                     onChange={handleChange}
                     placeholder="0"
-                    className="text-right"
+                    className="pr-8 text-right"
                   />
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">銭</span>
                 </div>
               </div>
             </div>

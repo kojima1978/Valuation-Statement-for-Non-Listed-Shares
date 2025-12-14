@@ -78,7 +78,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
         const profitPerSharePrev = profitPrevAmount / shareCount50;
         const profitPerShareAvg = ((profitPrevAmount + profit2PrevAmount) / 2) / shareCount50;
 
-        // Calculate individual profit values
+        // Calculate individual profit values (整数に切り捨て)
         const profitC1Value = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
         const profitC2Value = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
 
@@ -143,8 +143,19 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
         const rawOwnBookValueD2 = netAsset2Prev / shareCount50;
         const ownBookValueD2 = Math.floor(rawOwnBookValueD2);
 
-        // 比準要素数0の会社の判定: b1, c1, c2 がすべて0の場合
-        const isZeroElementCompany = ownDividendsB1 === 0 && ownProfitC1 === 0 && ownProfitC2 === 0;
+        // 評価方法の判定（優先順位: 比準要素数0 → 比準要素数1 → 一般）
+
+        // 比準要素数0の会社の判定: b1, c1, d1 がすべて0の場合
+        const isZeroElementCompany = ownDividendsB1 === 0 && ownProfitC1 === 0 && ownBookValueD1 === 0;
+
+        // 比準要素数1の会社の判定（比準要素数0に該当しない場合のみ判定）
+        // 条件: b1, c1, d1のいずれか2つが「0」 かつ b2, c2, d2の2以上が「0」
+        const countZeroInB1C1D1 = [ownDividendsB1, ownProfitC1, ownBookValueD1].filter(v => v === 0).length;
+        const countZeroInB2C2D2 = [ownDividendsB2, ownProfitC2, ownBookValueD2].filter(v => v === 0).length;
+        const isOneElementCompany = !isZeroElementCompany && (countZeroInB1C1D1 >= 2 && countZeroInB2C2D2 >= 2);
+
+        // 一般の評価会社: 比準要素数0にも比準要素数1にも該当しない場合（自動判定）
+        const isGeneralCompany = !isZeroElementCompany && !isOneElementCompany;
 
         onNext({
             // Results
@@ -160,6 +171,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
             ownBookValueD2,
             // Special classification
             isZeroElementCompany,
+            isOneElementCompany,
             // Profit calculation method selections
             profitMethodC,
             profitMethodC1,
@@ -603,7 +615,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                 const profitPerSharePrev = p1Val / shareCount50;
                                 const profitPerShareAvg = ((p1Val + p2Val) / 2) / shareCount50;
 
-                                // Calculate individual profit values
+                                // Calculate individual profit values (整数に切り捨て)
                                 const profitC1Val = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
                                 const profitC2Val = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
 
@@ -653,18 +665,24 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                 const bv1 = (Number(formData.ownCapitalPrev) + Number(formData.ownRetainedEarningsPrev)) * 1000;
                                 const d = Math.floor(bv1 / shareCount50);
 
-                                // Additional calculations
+                                // Additional calculations for b1, b2
                                 const b1 = b; // (直前期 + 2期前) ÷ 2
                                 const b2Avg = ((Number(formData.ownDividend2Prev) + Number(formData.ownDividend3Prev)) * 1000) / 2;
                                 const b2 = Math.floor((b2Avg / shareCount50) * 10) / 10;
 
-                                // Use the display values calculated above
+                                // For display: Use the display values calculated above
                                 const c1 = c1Display;
                                 const c2 = c2Display;
 
+                                // For judgment: Always use actual c1 (直前) and c2 (2年平均) raw values before flooring
+                                const c1Actual = profitPerSharePrev;  // 直前期の生の値
+                                const c2Actual = profitPerShareAvg;   // 2年平均の生の値
+
+                                // d1, d2 calculations
                                 const d1 = d; // 直前期
                                 const bv2 = (Number(formData.ownCapital2Prev) + Number(formData.ownRetainedEarnings2Prev)) * 1000;
-                                const d2 = Math.floor(bv2 / shareCount50);
+                                const d2Raw = bv2 / shareCount50;  // 生の値
+                                const d2 = Math.floor(d2Raw);
 
                                 return (
                                     <div className="space-y-4">
@@ -691,7 +709,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                                 </div>
 
                                                 <div className="text-right whitespace-nowrap">
-                                                    <span className="font-bold">{c.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                                                    <span className="font-bold">{c.toLocaleString()}</span>
                                                     <span className="text-xs ml-1 text-muted-foreground">円</span>
                                                 </div>
                                             </div>
@@ -704,7 +722,7 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
                                                 </div>
 
                                                 <div className="text-right whitespace-nowrap">
-                                                    <span className="font-bold">{d.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                                                    <span className="font-bold">{d.toLocaleString()}</span>
                                                     <span className="text-xs ml-1 text-muted-foreground">円</span>
                                                 </div>
                                             </div>
@@ -716,14 +734,14 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">b1:</span>
+                                                    <span className="text-black whitespace-nowrap">（1株当たりの配当金額）b1:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownDividendPrev).toLocaleString()} + {Number(formData.ownDividend2Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
                                                     <span className={`font-semibold whitespace-nowrap ${b1 === 0 ? 'text-red-600' : 'text-black'}`}>{b1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">b2:</span>
+                                                    <span className="text-black whitespace-nowrap">（1株当たりの配当金額）b2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownDividend2Prev).toLocaleString()} + {Number(formData.ownDividend3Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
@@ -733,50 +751,97 @@ export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">c1:</span>
+                                                    <span className="text-black whitespace-nowrap">（1株当たりの利益金額）c1:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         {c1Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className={`font-semibold whitespace-nowrap ${c1 === 0 ? 'text-red-600' : 'text-black'}`}>{c1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${c1 === 0 ? 'text-red-600' : 'text-black'}`}>{c1.toLocaleString()}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">c2:</span>
+                                                    <span className="text-black whitespace-nowrap">（1株当たりの利益金額）c2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         {c2Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className={`font-semibold whitespace-nowrap ${c2 === 0 ? 'text-red-600' : 'text-black'}`}>{c2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${c2 === 0 ? 'text-red-600' : 'text-black'}`}>{c2.toLocaleString()}円</span>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">d1:</span>
+                                                    <span className="text-black whitespace-nowrap">（1株当たりの純資産価額）d1:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownCapitalPrev).toLocaleString()} + {Number(formData.ownRetainedEarningsPrev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className={`font-semibold whitespace-nowrap ${d1 === 0 ? 'text-red-600' : 'text-black'}`}>{d1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${d1 === 0 ? 'text-red-600' : 'text-black'}`}>{d1.toLocaleString()}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">d2:</span>
+                                                    <span className="text-black whitespace-nowrap">（1株当たりの純資産価額）d2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownCapital2Prev).toLocaleString()} + {Number(formData.ownRetainedEarnings2Prev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
-                                                    <span className={`font-semibold whitespace-nowrap ${d2 === 0 ? 'text-red-600' : 'text-black'}`}>{d2.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${d2 === 0 ? 'text-red-600' : 'text-black'}`}>{d2.toLocaleString()}円</span>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* 比準要素数0の会社の警告 */}
-                                        {b1 === 0 && c1 === 0 && c2 === 0 && (
-                                            <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-3 mt-3">
-                                                <p className="text-xs font-bold text-amber-900">
-                                                    ⚠️ 比準要素数0の会社 (b1=0, c1=0, c2=0)
-                                                </p>
-                                                <p className="text-[10px] text-amber-800 mt-1">
-                                                    L = 0.00 として純資産価額のみで評価します
-                                                </p>
-                                            </div>
-                                        )}
+                                        {/* 評価方法の判定と警告表示（優先順位: 比準要素数0 → 比準要素数1 → 一般） */}
+                                        {(() => {
+                                            // 比準要素数0の会社の判定（切り捨て後の表示値を使用して判定）
+                                            const isZeroElem = b1 <= 0 && c1 <= 0 && d1 <= 0;
+
+                                            if (isZeroElem) {
+                                                return (
+                                                    <div className="bg-amber-50 border-2 border-amber-300 rounded-lg p-3 mt-3">
+                                                        <p className="text-xs font-bold text-amber-900">
+                                                            ⚠️ 比準要素数0の会社 (b1=0, c1=0, d1=0)
+                                                        </p>
+                                                        <p className="text-[10px] text-amber-800 mt-1">
+                                                            純資産価額
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }
+
+                                            // 比準要素数1の会社の判定（比準要素数0に該当しない場合のみ）
+                                            // 切り捨て後の表示値を使用して判定
+                                            const zeroCountB1C1D1 = [b1, c1, d1].filter(v => v <= 0).length;
+                                            const zeroCountB2C2D2 = [b2, c2, d2].filter(v => v <= 0).length;
+                                            const isOneElem = zeroCountB1C1D1 >= 2 && zeroCountB2C2D2 >= 2;
+
+                                            if (isOneElem) {
+                                                return (
+                                                    <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-3 mt-3">
+                                                        <p className="text-xs font-bold text-orange-900">
+                                                            ⚠️ 比準要素数1の会社
+                                                        </p>
+                                                        <p className="text-[10px] text-orange-800 mt-1">
+                                                            b1, c1, d1のいずれか2つが「0」かつ b2, c2, d2の2以上が「0」
+                                                        </p>
+                                                        <p className="text-[10px] text-orange-800 mt-2">
+                                                            次のうちいずれか低い方の金額
+                                                        </p>
+                                                        <p className="text-[10px] text-orange-800 pl-3">
+                                                            イ　純資産価格
+                                                        </p>
+                                                        <p className="text-[10px] text-orange-800 pl-3">
+                                                            ロ　（ 類似業種比準価格 × 0.25 ）＋（ 純資産価格 × 0.75 ）
+                                                        </p>
+                                                    </div>
+                                                );
+                                            }
+
+                                            // 一般の評価会社（該当する場合は表示）
+                                            return (
+                                                <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-3 mt-3">
+                                                    <p className="text-xs font-bold text-blue-900">
+                                                        ✓ 一般の評価会社
+                                                    </p>
+                                                    <p className="text-[10px] text-blue-800 mt-1">
+                                                        標準的な類似業種比準方式で評価します
+                                                    </p>
+                                                </div>
+                                            );
+                                        })()}
 
                                         <div className="text-[10px] text-right text-muted-foreground pt-2 border-t border-dashed border-primary/10">
                                             ※ {shareCount50.toLocaleString()}株 (50円換算) で計算

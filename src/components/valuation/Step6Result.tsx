@@ -49,16 +49,11 @@ export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Prop
                         </div>
 
                         {/* Comparison Table */}
-                        <div className="mt-4 bg-white/50 p-4 rounded-lg border border-secondary/10 inline-block text-left min-w-[300px]">
-                            <p className="text-xs text-center text-muted-foreground mb-2">- 判定根拠 (低い方を選択) -</p>
-                            <div className="space-y-2">
-                                {results.comparisonDetails.map((item, idx) => (
-                                    <div key={idx} className={`flex justify-between text-sm ${item.value === results.finalValue ? "font-bold text-primary" : "text-muted-foreground"}`}>
-                                        <span>{item.name}</span>
-                                        <span>{item.value.toLocaleString()} 円</span>
-                                    </div>
-                                ))}
-                            </div>
+                        <div className="mt-4 text-center">
+                            <p className="text-xs text-muted-foreground mb-2">算定方法</p>
+                            <p className="text-sm text-foreground">
+                                {results.comparisonDetails.length > 0 ? results.comparisonDetails[0].name : ""}
+                            </p>
                         </div>
                     </div>
                 </Card>
@@ -86,6 +81,96 @@ export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Prop
                         <div className="text-3xl font-bold text-right">
                             {results.netAssetPerShare.toLocaleString()} <span className="text-sm text-muted-foreground">円</span>
                         </div>
+                    </div>
+                </Card>
+
+                {/* 計算過程 */}
+                <Card className="col-span-1 md:col-span-2 p-6 border-primary/10 bg-gradient-to-br from-white to-primary/5">
+                    <div className="text-sm">
+                        {(() => {
+                            const S = results.comparableValue;
+                            const N = results.netAssetPerShare;
+                            const L = results.lRatio;
+
+                            // 比準要素数0
+                            if (financials.isZeroElementCompany) {
+                                return (
+                                    <div className="space-y-2">
+                                        <p className="font-semibold text-foreground">比準要素数0の会社</p>
+                                        <p className="text-muted-foreground">純資産価額</p>
+                                        <p className="text-foreground pl-4">{N.toLocaleString()}円</p>
+                                    </div>
+                                );
+                            }
+
+                            // 比準要素数1
+                            if (financials.isOneElementCompany) {
+                                const blended = Math.floor(S * 0.25 + N * 0.75);
+                                return (
+                                    <div className="space-y-2">
+                                        <p className="font-semibold text-foreground">比準要素数1の会社</p>
+                                        <p className="text-muted-foreground">次のうちいずれか低い方の金額</p>
+                                        <div className="pl-4 space-y-1">
+                                            <p className="text-muted-foreground">イ　（類似業種比準価額 × 0.25）＋（純資産価額 × 0.75）</p>
+                                            <p className="text-foreground pl-6">= ({S.toLocaleString()} × 0.25) + ({N.toLocaleString()} × 0.75)</p>
+                                            <p className="text-foreground pl-6">= {blended.toLocaleString()}円</p>
+                                            <p className="text-muted-foreground mt-2">ロ　純資産価額</p>
+                                            <p className="text-foreground pl-6">= {N.toLocaleString()}円</p>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            // 大会社
+                            if (results.size === "Big") {
+                                return (
+                                    <div className="space-y-2">
+                                        <p className="font-semibold text-foreground">大会社の株式の価額</p>
+                                        <p className="text-muted-foreground">次のうちいずれか低い方の金額</p>
+                                        <div className="pl-4 space-y-1">
+                                            <p className="text-muted-foreground">イ　類似業種比準価額</p>
+                                            <p className="text-foreground pl-6">{S.toLocaleString()}円</p>
+                                            <p className="text-muted-foreground mt-2">ロ　純資産価額</p>
+                                            <p className="text-foreground pl-6">{N.toLocaleString()}円</p>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            // 中会社
+                            if (results.size === "Medium") {
+                                const blended = Math.floor(S * L + N * (1 - L));
+                                return (
+                                    <div className="space-y-2">
+                                        <p className="font-semibold text-foreground">中会社の株式の価額 (L={L})</p>
+                                        <p className="text-muted-foreground">次のうちいずれか低い方の金額</p>
+                                        <div className="pl-4 space-y-1">
+                                            <p className="text-muted-foreground">イ　（類似業種比準価額 × {L}）＋（純資産価額 × {(1-L).toFixed(2)}）</p>
+                                            <p className="text-foreground pl-6">= ({S.toLocaleString()} × {L}) + ({N.toLocaleString()} × {(1-L).toFixed(2)})</p>
+                                            <p className="text-foreground pl-6">= {blended.toLocaleString()}円</p>
+                                            <p className="text-muted-foreground mt-2">ロ　純資産価額</p>
+                                            <p className="text-foreground pl-6">{N.toLocaleString()}円</p>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            // 小会社
+                            const blended = Math.floor(S * 0.5 + N * 0.5);
+                            return (
+                                <div className="space-y-2">
+                                    <p className="font-semibold text-foreground">小会社の株式の価額</p>
+                                    <p className="text-muted-foreground">次のうちいずれか低い方の金額</p>
+                                    <div className="pl-4 space-y-1">
+                                        <p className="text-muted-foreground">イ　純資産価額</p>
+                                        <p className="text-foreground pl-6">{N.toLocaleString()}円</p>
+                                        <p className="text-muted-foreground mt-2">ロ　（類似業種比準価額 × 0.50）＋（純資産価額 × 0.50）</p>
+                                        <p className="text-foreground pl-6">= ({S.toLocaleString()} × 0.50) + ({N.toLocaleString()} × 0.50)</p>
+                                        <p className="text-foreground pl-6">= {blended.toLocaleString()}円</p>
+                                    </div>
+                                </div>
+                            );
+                        })()}
                     </div>
                 </Card>
             </div>

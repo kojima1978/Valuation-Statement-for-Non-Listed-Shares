@@ -50,6 +50,7 @@ export interface Financials {
 
     // Special company classification
     isZeroElementCompany?: boolean; // 比準要素数0の会社 (b1=0, c1=0, c2=0)
+    isOneElementCompany?: boolean;  // 比準要素数1の会社 (b1,c1,d1のいずれか2つが0 かつ b2,c2,d2の2以上が0)
 
     // Profit calculation method selections
     profitMethodC?: "auto" | "c1" | "c2";  // c の選択

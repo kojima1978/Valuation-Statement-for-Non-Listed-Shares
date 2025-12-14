@@ -114,16 +114,13 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
             if (basicInfo.size === "Small") multiplier = 0.5;
         }
 
-        const ownCapitalPrev = defaultValues?.ownCapitalPrev ? Number(defaultValues.ownCapitalPrev) : 0;
-
         // Use centralized logic from valuation-logic.ts
         const result = calculateDetailedSimilarIndustryMethod(
             A,
             B_ind, C_ind, D_ind,
             b_own, c_own, d_own,
             multiplier,
-            basicInfo,
-            ownCapitalPrev
+            basicInfo
         );
 
         return result;
@@ -369,7 +366,7 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
                                     <div className="flex items-center justify-center gap-2 text-xs">
                                         <span className="text-black">1株当たりの資本金額</span>
                                         <span className="font-bold text-black">
-                                            {Math.floor(((basicInfo.capital || 0) * 1000) / (basicInfo.issuedShares || 1)).toLocaleString()}円
+                                            {(((basicInfo.capital || 0) * 1000) / (basicInfo.issuedShares || 1)).toLocaleString(undefined, { maximumFractionDigits: 0 })}円
                                         </span>
                                         <span className="text-black">/</span>
                                         <span className="font-bold text-black">50円</span>
