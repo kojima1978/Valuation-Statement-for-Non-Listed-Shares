@@ -148,10 +148,10 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Comparable Company Data */}
                     <div className="space-y-4">
-                        <div className="bg-muted/30 p-4 rounded-xl space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-dashed">
-                                <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">4</div>
-                                <h3 className="text-lg font-bold">同業者のデータ (国税庁公表値)</h3>
+                        <div className="bg-blue-50 p-4 rounded-xl border-2 border-blue-200 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-blue-300">
+                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">✎</div>
+                                <h3 className="text-lg font-bold text-blue-900">入力：同業者のデータ (国税庁公表値)</h3>
                             </div>
 
                             {/* A: Stock Price */}
@@ -285,8 +285,11 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                     </div>
 
                     {/* Real-time Result Preview */}
-                    <div className="bg-primary/5 p-4 rounded-xl border border-primary/20">
-                        <h3 className="text-sm font-bold text-muted-foreground mb-4 border-b border-primary/10 pb-2">比準価額の計算結果 (リアルタイムプレビュー)</h3>
+                    <div className="bg-green-50 p-4 rounded-xl border-2 border-green-300">
+                        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-green-400">
+                            <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                            <h3 className="text-sm font-bold text-green-900">計算結果：比準価額の計算結果 (リアルタイムプレビュー)</h3>
+                        </div>
 
                         {details ? (
                             <div className="space-y-4">

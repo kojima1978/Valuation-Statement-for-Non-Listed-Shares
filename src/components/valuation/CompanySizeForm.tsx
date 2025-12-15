@@ -72,10 +72,10 @@ export function CompanySizeForm({ onNext, onBack, defaultValues }: CompanySizeFo
             <Card className="p-6 border-secondary/20 shadow-lg">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
-                        <div className="bg-primary/5 p-4 rounded-lg space-y-4">
-                            <div className="flex items-center gap-2 pb-2 border-b border-dashed">
-                                <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">2</div>
-                                <h3 className="text-lg font-bold">会社規模判定データ</h3>
+                        <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-blue-300">
+                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">✎</div>
+                                <h3 className="text-lg font-bold text-blue-900">入力：会社規模判定データ</h3>
                             </div>
 
                             <div className="space-y-2">
@@ -168,8 +168,11 @@ export function CompanySizeForm({ onNext, onBack, defaultValues }: CompanySizeFo
                         </div>
 
                         {/* Real-time Result Preview */}
-                        <div className="bg-primary/5 p-4 rounded-xl border border-primary/20">
-                            <h3 className="text-sm font-bold text-muted-foreground mb-2">判定結果 (リアルタイムプレビュー)</h3>
+                        <div className="bg-green-50 p-4 rounded-xl border-2 border-green-300">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                                <h3 className="text-sm font-bold text-green-900">計算結果：判定結果 (リアルタイムプレビュー)</h3>
+                            </div>
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1">
                                     <p className="text-sm text-muted-foreground">会社規模区分</p>

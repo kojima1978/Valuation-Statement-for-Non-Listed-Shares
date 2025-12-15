@@ -222,10 +222,10 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
             <Card className="p-6 border-secondary/20 shadow-lg">
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b border-dashed">
+                        <div className="flex items-center justify-between pb-2 border-b border-blue-300 bg-blue-50 p-4 rounded-t-lg border-2 border-b-0 border-blue-200">
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">3</div>
-                                <h3 className="text-lg font-bold">自社のデータ</h3>
+                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">✎</div>
+                                <h3 className="text-lg font-bold text-blue-900">入力：自社のデータ</h3>
                             </div>
                             <Button
                                 type="button"
@@ -240,7 +240,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
 
                         {/* Dividends */}
-                        <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
+                        <div className="space-y-2 bg-blue-50 p-4 rounded-lg border-2 border-blue-200 border-t-0">
                             <Label>配当金額 (b)</Label>
                             <div className="grid grid-cols-3 gap-2">
                                 <div className="space-y-1">
@@ -289,7 +289,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                         </div>
 
                         {/* Profit */}
-                        <div className="space-y-3 bg-primary/5 p-4 rounded-lg">
+                        <div className="space-y-3 bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
                             <Label>利益金額 (c)</Label>
 
                             {/* Selection for c */}
@@ -515,7 +515,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                         </div>
 
                         {/* Book Value */}
-                        <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
+                        <div className="space-y-2 bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
                             <Label>純資産価額 (d)</Label>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -589,8 +589,11 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
 
                         {/* Real-time Preview */}
-                        <div className="space-y-3 bg-white/50 p-4 rounded-lg border border-primary/10 text-sm">
-                            <h4 className="font-bold text-muted-foreground border-b border-primary/10 pb-1 mb-2">リアルタイムプレビュー (1株50円換算)</h4>
+                        <div className="space-y-3 bg-green-50 p-4 rounded-lg border-2 border-green-300 text-sm">
+                            <div className="flex items-center gap-2 pb-2 border-b border-green-400">
+                                <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                                <h4 className="font-bold text-green-900">計算結果：リアルタイムプレビュー (1株50円換算)</h4>
+                            </div>
 
                             {(() => {
                                 // Calculate Share Count (50 yen par value)

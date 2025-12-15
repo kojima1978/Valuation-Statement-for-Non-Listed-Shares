@@ -65,10 +65,10 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
 
                     {/* Net Assets Data */}
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b border-dashed">
+                        <div className="flex items-center justify-between pb-2 border-b border-blue-300 bg-blue-50 p-4 rounded-t-lg border-2 border-b-0 border-blue-200">
                             <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">5</div>
-                                <h3 className="text-lg font-bold">純資産価額の計算要素</h3>
+                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">✎</div>
+                                <h3 className="text-lg font-bold text-blue-900">入力：純資産価額の計算要素</h3>
                             </div>
                             <Button
                                 type="button"
@@ -83,7 +83,7 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Assets */}
-                            <div className="space-y-4 p-4 rounded-lg bg-primary/5">
+                            <div className="space-y-4 p-4 rounded-lg bg-blue-50 border-2 border-blue-200 border-t-0">
                                 <Label className="font-bold underline">資産の部</Label>
 
                                 {/* Order: Inheritance Value (Top), Book Value (Bottom) */}
@@ -120,7 +120,7 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
                             </div>
 
                             {/* Liabilities */}
-                            <div className="space-y-4 p-4 rounded-lg bg-primary/5">
+                            <div className="space-y-4 p-4 rounded-lg bg-blue-50 border-2 border-blue-200 border-t-0">
                                 <Label className="font-bold underline">負債の部</Label>
 
                                 {/* Order: Inheritance Value (Top), Book Value (Bottom) */}
@@ -160,8 +160,11 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
                     </div>
 
                     {/* Real-time Result Preview */}
-                    <div className="bg-primary/5 p-4 rounded-xl border border-primary/20">
-                        <h3 className="text-sm font-bold text-muted-foreground mb-2">純資産価額の計算結果 (リアルタイムプレビュー)</h3>
+                    <div className="bg-green-50 p-4 rounded-xl border-2 border-green-300">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                            <h3 className="text-sm font-bold text-green-900">計算結果：純資産価額の計算結果 (リアルタイムプレビュー)</h3>
+                        </div>
                         <div className="space-y-2">
                             <div className="flex items-center justify-between border-b border-primary/10 pb-2">
                                 <span className="text-sm text-muted-foreground">相続税評価額ベースの純資産</span>

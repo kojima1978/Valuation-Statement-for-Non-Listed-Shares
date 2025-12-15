@@ -108,10 +108,10 @@ export function BasicInfoForm({ onNext, onBack, defaultValues }: BasicInfoFormPr
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         {/* Company Basic Data Section */}
-                        <div className="space-y-4 bg-primary/5 p-4 rounded-lg">
-                            <div className="flex items-center gap-2 pb-2 border-b border-dashed">
-                                <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">1</div>
-                                <h3 className="text-lg font-bold">会社基本データ</h3>
+                        <div className="space-y-4 bg-blue-50 p-4 rounded-lg border-2 border-blue-200">
+                            <div className="flex items-center gap-2 pb-2 border-b border-blue-300">
+                                <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">✎</div>
+                                <h3 className="text-lg font-bold text-blue-900">入力：会社基本データ</h3>
                             </div>
 
                             <div className="space-y-4">
@@ -187,8 +187,11 @@ export function BasicInfoForm({ onNext, onBack, defaultValues }: BasicInfoFormPr
                             </div>
 
                             {/* Calculation Preview */}
-                            <div className="space-y-3 bg-white/50 p-4 rounded-lg border border-primary/10 text-sm">
-                                <h4 className="font-bold text-muted-foreground border-b border-primary/10 pb-1 mb-2">リアルタイムプレビュー</h4>
+                            <div className="space-y-3 bg-green-50 p-4 rounded-lg border-2 border-green-300 text-sm">
+                                <div className="flex items-center gap-2 pb-2 border-b border-green-400">
+                                    <div className="w-6 h-6 rounded-full bg-green-600 text-white flex items-center justify-center text-xs font-bold">✓</div>
+                                    <h4 className="font-bold text-green-900">計算結果：リアルタイムプレビュー</h4>
+                                </div>
 
                                 <div className="flex justify-between items-center">
                                     <span className="text-muted-foreground">1株当たりの資本金額</span>
