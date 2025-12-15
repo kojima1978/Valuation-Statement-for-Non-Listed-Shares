@@ -68,7 +68,7 @@ export function ValuationSimulation({ basicInfo, financials, onBack }: Valuation
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="text-center space-y-2">
-                <h2 className="text-3xl font-black text-primary">シミュレーション (Step 7/7)</h2>
+                <h2 className="text-3xl font-black text-primary">シミュレーション (Step 8/8)</h2>
                 <p className="text-muted-foreground">
                     直前期の利益を「0」と仮定した場合の株価試算と比較します。
                 </p>

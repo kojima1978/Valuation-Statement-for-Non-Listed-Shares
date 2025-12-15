@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { calculateCompanySizeAndL, IndustryType } from "@/lib/valuation-logic";
 import { BasicInfo } from "@/types/valuation";
 import { Button } from "@/components/ui/Button";
@@ -11,9 +11,10 @@ interface CompanySizeFormProps {
     onNext: (data: Partial<BasicInfo>) => void;
     onBack: () => void;
     defaultValues?: Partial<BasicInfo>;
+    onChange?: (data: Partial<BasicInfo>) => void;
 }
 
-export function CompanySizeForm({ onNext, onBack, defaultValues }: CompanySizeFormProps) {
+export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: CompanySizeFormProps) {
     const [formData, setFormData] = useState({
         employees: defaultValues?.employees?.toString() || "",
         totalAssets: defaultValues?.totalAssets ? (defaultValues.totalAssets / 1000).toString() : "",
@@ -21,13 +22,70 @@ export function CompanySizeForm({ onNext, onBack, defaultValues }: CompanySizeFo
         industryType: defaultValues?.industryType as IndustryType || "Wholesale",
     });
 
+    // Update form data when defaultValues changes (e.g., when coming from Step 1 or Step 3)
+    useEffect(() => {
+        if (defaultValues) {
+            setFormData({
+                employees: defaultValues?.employees?.toString() || "",
+                totalAssets: defaultValues?.totalAssets ? (defaultValues.totalAssets / 1000).toString() : "",
+                sales: defaultValues?.sales ? (defaultValues.sales / 1000).toString() : "",
+                industryType: defaultValues?.industryType as IndustryType || "Wholesale",
+            });
+        }
+    }, [defaultValues]);
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData((prev) => {
+            const newData = { ...prev, [name]: value };
+            notifyChange(newData);
+            return newData;
+        });
     };
 
     const handleIndustryChange = (type: IndustryType) => {
-        setFormData((prev) => ({ ...prev, industryType: type }));
+        setFormData((prev) => {
+            const newData = { ...prev, industryType: type };
+            notifyChange(newData);
+            return newData;
+        });
+    };
+
+    const notifyChange = (data: typeof formData) => {
+        if (onChange) {
+            // Only notify if there's actual data to save
+            // Don't overwrite with empty/zero values
+            const employees = data.employees ? Number(data.employees.replace(/,/g, "")) : undefined;
+            const totalAssets = data.totalAssets ? Number(data.totalAssets.replace(/,/g, "")) * 1000 : undefined;
+            const sales = data.sales ? Number(data.sales.replace(/,/g, "")) * 1000 : undefined;
+
+            // Only calculate and save if we have valid data
+            if (employees !== undefined || totalAssets !== undefined || sales !== undefined) {
+                const { size, lRatio, sizeMultiplier } = calculateCompanySizeAndL({
+                    employees: employees ?? 0,
+                    sales: sales ?? 0,
+                    totalAssets: totalAssets ?? 0,
+                    industryType: data.industryType,
+                });
+
+                const updateData: Partial<BasicInfo> = {
+                    industryType: data.industryType,
+                };
+
+                if (employees !== undefined) updateData.employees = employees;
+                if (totalAssets !== undefined) updateData.totalAssets = totalAssets;
+                if (sales !== undefined) updateData.sales = sales;
+
+                // Only add calculated values if we have real input data
+                if (employees !== undefined && totalAssets !== undefined && sales !== undefined) {
+                    updateData.size = size;
+                    updateData.lRatio = lRatio;
+                    updateData.sizeMultiplier = sizeMultiplier;
+                }
+
+                onChange(updateData);
+            }
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {

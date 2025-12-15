@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BasicInfo } from "@/types/valuation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -24,6 +24,19 @@ export function BasicInfoForm({ onNext, onBack, defaultValues }: BasicInfoFormPr
         issuedShares: defaultValues?.issuedShares?.toString() || "",
     });
     const [selectedDummyPattern, setSelectedDummyPattern] = useState<DummyDataPatternKey | undefined>(undefined);
+
+    // Update form data when defaultValues changes (e.g., when returning from Step 2)
+    useEffect(() => {
+        if (defaultValues) {
+            setFormData({
+                companyName: defaultValues?.companyName || "",
+                taxationPeriod: defaultValues?.taxationPeriod || "",
+                previousPeriod: defaultValues?.previousPeriod || "",
+                capital: defaultValues?.capital?.toString() || "",
+                issuedShares: defaultValues?.issuedShares?.toString() || "",
+            });
+        }
+    }, [defaultValues]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
         const { name, value } = e.target;

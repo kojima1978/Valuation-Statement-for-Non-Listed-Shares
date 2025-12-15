@@ -436,3 +436,107 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
                           size === "Medium" ? "中会社" : "小会社"
     };
 }
+
+/**
+ * Calculates Corporate Tax Fair Value (法人税法上の時価)
+ * Used in Step 7 only.
+ *
+ * 比準要素数0、1以外の場合は会社規模に関わらず小会社の株式の価額で評価
+ */
+export function calculateCorporateTaxFairValue(basicInfo: BasicInfo, financials: Financials) {
+    const { assetsBookValue, liabilitiesBookValue } = financials;
+    const assetsInheritanceValue = financials.assetsInheritanceValue ?? assetsBookValue;
+    const liabilitiesInheritanceValue = financials.liabilitiesInheritanceValue ?? liabilitiesBookValue;
+
+    let { issuedShares, sizeMultiplier } = basicInfo;
+
+    // 1. Net Asset Value per Share (N) - 法人税法上の時価では税金調整なし
+    const netInh = assetsInheritanceValue - liabilitiesInheritanceValue;
+    const netAssetPerShare = Math.max(0, netInh / issuedShares);
+
+    // 2. Comparable Company Value (S)
+    const {
+        industryStockPriceCurrent,
+        industryStockPrice1MonthBefore,
+        industryStockPrice2MonthsBefore,
+        industryStockPricePrevYearAverage,
+        industryDividends: B,
+        industryProfit: C,
+        industryBookValue: D,
+        ownDividends: b,
+        ownProfit: c,
+        ownBookValue: d
+    } = financials;
+
+    const possibleAs = [
+        industryStockPriceCurrent,
+        industryStockPrice1MonthBefore,
+        industryStockPrice2MonthsBefore,
+        industryStockPricePrevYearAverage
+    ].filter(n => n > 0);
+    const A = possibleAs.length > 0 ? Math.min(...possibleAs) : 0;
+
+    const multiplier = sizeMultiplier || 0.7;
+
+    const simResult = calculateDetailedSimilarIndustryMethod(
+        A, B, C, D,
+        b, c, d,
+        multiplier,
+        basicInfo
+    );
+
+    const comparableValue = simResult.value;
+
+    // 3. Selection based on Corporate Tax Law
+    let finalValue = 0;
+    let methodDescription = "";
+
+    const S = comparableValue;
+    const N = netAssetPerShare;
+
+    let comparisonDetails: { name: string; value: number }[] = [];
+
+    // 比準要素数0の会社の場合（純資産価額のみ）
+    if (financials.isZeroElementCompany) {
+        finalValue = N;
+        methodDescription = "比準要素数0の会社 (純資産価額)";
+        comparisonDetails = [
+            { name: "比準要素数0", value: Math.floor(N) }
+        ];
+    }
+    // 比準要素数1の会社の場合（S×0.25 + N×0.75とNのいずれか低い方）
+    else if (financials.isOneElementCompany) {
+        const blended = (S * 0.25) + (N * 0.75);
+        finalValue = Math.min(blended, N);
+        methodDescription = "比準要素数1の会社 ((S×0.25 + N×0.75)とNのいずれか低い方)";
+        comparisonDetails = [
+            { name: "比準要素数1", value: Math.floor(finalValue) }
+        ];
+    }
+    // それ以外の場合は会社規模に関わらず小会社の株式の価額で評価
+    else {
+        const blended = (S * 0.50) + (N * 0.50);
+        finalValue = Math.min(N, blended);
+        methodDescription = "法人税法上の時価（小会社の株式の価額）";
+        comparisonDetails = [
+            { name: "小会社の株式の価額", value: Math.floor(finalValue) }
+        ];
+    }
+
+    return {
+        finalValue: Math.floor(finalValue),
+        netAssetPerShare: Math.floor(N),
+        comparableValue: Math.floor(S),
+        methodDescription,
+        comparisonDetails,
+        netAssetDetail: {
+            netInh, // 相続税評価額ベースの純資産（税金調整なし）
+            netBook: 0, // 法人税法上の時価では使用しない
+            tax: 0 // 法人税法上の時価では税金調整なし
+        },
+        // 計算過程の詳細
+        calculationMethod: financials.isZeroElementCompany ? "比準要素数0" :
+                          financials.isOneElementCompany ? "比準要素数1" :
+                          "小会社"
+    };
+}
