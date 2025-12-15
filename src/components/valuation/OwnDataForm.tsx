@@ -7,14 +7,14 @@ import { Card } from "@/components/ui/Card";
 import { Label } from "@/components/ui/Label";
 import { NumberInput } from "@/components/ui/NumberInput";
 
-interface Step3Props {
+interface OwnDataFormProps {
     basicInfo: BasicInfo | Partial<BasicInfo>;
     onBack: () => void;
     onNext: (data: Partial<Financials>) => void;
     defaultValues?: Partial<Financials>;
 }
 
-export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3Props) {
+export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDataFormProps) {
     const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC || "auto");
     const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC1 || "auto");
     const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC2 || "auto");

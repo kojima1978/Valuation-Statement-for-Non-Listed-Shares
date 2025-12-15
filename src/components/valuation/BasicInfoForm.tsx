@@ -9,13 +9,13 @@ import { Label } from "@/components/ui/Label";
 import { Card } from "@/components/ui/Card";
 import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
 
-interface Step1Props {
+interface BasicInfoFormProps {
     onNext: (data: Partial<BasicInfo>, dummyDataKey?: DummyDataPatternKey) => void;
     onBack?: () => void;
     defaultValues?: Partial<BasicInfo>;
 }
 
-export function Step1BasicInfo({ onNext, onBack, defaultValues }: Step1Props) {
+export function BasicInfoForm({ onNext, onBack, defaultValues }: BasicInfoFormProps) {
     const [formData, setFormData] = useState({
         companyName: defaultValues?.companyName || "",
         taxationPeriod: defaultValues?.taxationPeriod || "",

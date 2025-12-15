@@ -7,14 +7,14 @@ import { Card } from "@/components/ui/Card";
 import { Label } from "@/components/ui/Label";
 import { NumberInput } from "@/components/ui/NumberInput";
 
-interface Step5Props {
+interface NetAssetFormProps {
     basicInfo: BasicInfo;
     onBack: () => void;
     onNext: (data: Partial<Financials>) => void;
     defaultValues?: Partial<Financials>;
 }
 
-export function Step5NetAsset({ basicInfo, onBack, onNext, defaultValues }: Step5Props) {
+export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAssetFormProps) {
     const [formData, setFormData] = useState({
         // Convert Yen to Thousand Yen for display if values exist
         assetsBookValue: defaultValues?.assetsBookValue ? (defaultValues.assetsBookValue / 1000).toString() : "",

@@ -7,13 +7,13 @@ import { NumberInput } from "@/components/ui/NumberInput";
 import { Label } from "@/components/ui/Label";
 import { Card } from "@/components/ui/Card";
 
-interface Step2Props {
+interface CompanySizeFormProps {
     onNext: (data: Partial<BasicInfo>) => void;
     onBack: () => void;
     defaultValues?: Partial<BasicInfo>;
 }
 
-export function Step2CompanySize({ onNext, onBack, defaultValues }: Step2Props) {
+export function CompanySizeForm({ onNext, onBack, defaultValues }: CompanySizeFormProps) {
     const [formData, setFormData] = useState({
         employees: defaultValues?.employees?.toString() || "",
         totalAssets: defaultValues?.totalAssets ? (defaultValues.totalAssets / 1000).toString() : "",

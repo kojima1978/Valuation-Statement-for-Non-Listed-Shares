@@ -9,14 +9,14 @@ import { NumberInput } from "@/components/ui/NumberInput";
 
 import { calculateDetailedSimilarIndustryMethod } from "@/lib/valuation-logic";
 
-interface Step4Props {
+interface IndustryDataFormProps {
     basicInfo: BasicInfo;
     onBack: () => void;
     onNext: (data: Partial<Financials>) => void;
     defaultValues?: Partial<Financials>;
 }
 
-export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: Step4Props) {
+export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: IndustryDataFormProps) {
     // Initializer to split dividend into yen and sen if it exists
     const initDiv = defaultValues?.industryDividends || 0;
     const initDivYen = Math.floor(initDiv);

@@ -7,13 +7,13 @@ import { useMemo } from "react";
 import Link from "next/link";
 import { calculateFinalValuation, calculateOwnFinancials } from "@/lib/valuation-logic";
 
-interface Step7Props {
+interface ValuationSimulationProps {
     basicInfo: BasicInfo;
     financials: Financials;
     onBack: () => void;
 }
 
-export function Step7Simulation({ basicInfo, financials, onBack }: Step7Props) {
+export function ValuationSimulation({ basicInfo, financials, onBack }: ValuationSimulationProps) {
     // Calculation Logic
     const simulationResults = useMemo(() => {
         // 1. Current Valuation

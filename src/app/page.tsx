@@ -11,14 +11,14 @@ export default function Home() {
     // sessionStorageをクリア
     sessionStorage.removeItem('valuationBasicInfo');
     sessionStorage.removeItem('valuationFinancials');
-    router.push('/valuation?mode=step');
+    router.push('/valuation/step1');
   };
 
   const handleBulkInputClick = () => {
     // sessionStorageをクリア
     sessionStorage.removeItem('valuationBasicInfo');
     sessionStorage.removeItem('valuationFinancials');
-    router.push('/valuation?mode=bulk');
+    router.push('/valuation/bulk');
   };
 
   return (

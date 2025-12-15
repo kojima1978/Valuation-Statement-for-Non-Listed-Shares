@@ -7,14 +7,14 @@ import { useMemo } from "react";
 
 import { calculateFinalValuation } from "@/lib/valuation-logic";
 
-interface Step6Props {
+interface ValuationResultProps {
     basicInfo: BasicInfo;
     financials: Financials;
     onBack: () => void;
     onNext?: () => void;
 }
 
-export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Props) {
+export function ValuationResult({ basicInfo, financials, onBack, onNext }: ValuationResultProps) {
     // Calculation Logic
     // Use calculateFinalValuation from logic.ts to ensure consistency including conversion ratio
     const results = useMemo(() => {
@@ -28,7 +28,7 @@ export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Prop
         sessionStorage.setItem('valuationFinancials', JSON.stringify(financials));
 
         // ページ遷移
-        window.location.href = '/valuation?mode=bulk';
+        window.location.href = '/valuation/bulk';
     };
 
     return (
@@ -78,8 +78,8 @@ export function Step6Result({ basicInfo, financials, onBack, onNext }: Step6Prop
                             <span className="w-6 h-6 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-bold">B</span>
                             <h4 className="font-bold">純資産価額 (N)</h4>
                         </div>
-                        <div className="text-3xl font-bold text-right">
-                            {results.netAssetPerShare.toLocaleString()} <span className="text-sm text-muted-foreground">円</span>
+                        <div className="text-3xl font-bold text-right text-secondary">
+                            {results.netAssetPerShare.toLocaleString()} <span className="text-sm text-foreground">円</span>
                         </div>
                     </div>
                 </Card>

@@ -10,14 +10,14 @@ import { BasicInfo, Financials } from "@/types/valuation";
 import { calculateCompanySizeAndL, IndustryType } from "@/lib/valuation-logic";
 import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
 
-interface BulkInputProps {
+interface ValuationBulkInputProps {
   onSubmit: (basicInfo: BasicInfo, financials: Financials) => void;
   onBack?: () => void;
   defaultBasicInfo?: BasicInfo | null;
   defaultFinancials?: Financials | null;
 }
 
-export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancials }: BulkInputProps) {
+export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancials }: ValuationBulkInputProps) {
   const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">("auto");
   const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("auto");
   const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("auto");
