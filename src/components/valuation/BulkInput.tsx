@@ -173,6 +173,15 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
     });
   };
 
+  // Extract month from taxationPeriod
+  const getTaxationMonth = () => {
+    if (!formData.taxationPeriod) return "";
+    const match = formData.taxationPeriod.match(/(\d+)月/);
+    return match ? match[1] : "";
+  };
+
+  const taxationMonth = getTaxationMonth();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -932,7 +941,9 @@ export function BulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancial
             <Label>A: 株価（円）</Label>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <Label className="text-xs text-muted-foreground">課税時期の月</Label>
+                <Label className="text-xs text-muted-foreground">
+                  {taxationMonth ? `課税時期の月（${taxationMonth}月）` : "課税時期の月"}
+                </Label>
                 <div className="relative">
                   <NumberInput
                     name="industryStockPriceCurrent"

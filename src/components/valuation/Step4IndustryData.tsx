@@ -128,6 +128,15 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
 
     const details = calculateValuationDetails();
 
+    // Extract month from taxationPeriod (format: "YYYY年MM月DD日")
+    const getTaxationMonth = () => {
+        if (!basicInfo.taxationPeriod) return "";
+        const match = basicInfo.taxationPeriod.match(/(\d+)月/);
+        return match ? match[1] : "";
+    };
+
+    const taxationMonth = getTaxationMonth();
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="text-center space-y-2">
@@ -157,7 +166,9 @@ export function Step4IndustryData({ basicInfo, onBack, onNext, defaultValues }: 
                                 </div>
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div>
-                                        <Label htmlFor="industryStockPriceCurrent" className="text-xs text-muted-foreground">課税時期の月</Label>
+                                        <Label htmlFor="industryStockPriceCurrent" className="text-xs text-muted-foreground">
+                                            {taxationMonth ? `課税時期の月（${taxationMonth}月）` : "課税時期の月"}
+                                        </Label>
                                         <div className="relative">
                                             <NumberInput
                                                 id="industryStockPriceCurrent"

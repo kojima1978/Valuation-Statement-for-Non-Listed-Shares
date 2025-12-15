@@ -16,8 +16,8 @@ interface Step3Props {
 
 export function Step3OwnData({ basicInfo, onBack, onNext, defaultValues }: Step3Props) {
     const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC || "auto");
-    const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC1 || "c1");
-    const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC2 || "c2");
+    const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC1 || "auto");
+    const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC2 || "auto");
     const [formData, setFormData] = useState({
         // Dividends (Total Amount in Thousand Yen)
         ownDividendPrev: defaultValues?.ownDividendPrev?.toString() || "",
