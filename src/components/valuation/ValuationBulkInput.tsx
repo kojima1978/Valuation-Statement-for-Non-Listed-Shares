@@ -81,7 +81,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
         companyName: defaultBasicInfo?.companyName || "",
         taxationPeriod: defaultBasicInfo?.taxationPeriod || "",
         previousPeriod: defaultBasicInfo?.previousPeriod || "",
-        capital: defaultBasicInfo?.capital ? (defaultBasicInfo.capital / 1000).toString() : "",
+        capital: defaultBasicInfo?.capital?.toString() || "",
         issuedShares: defaultBasicInfo?.issuedShares?.toString() || "",
 
         // Step 2: 会社規模
@@ -186,7 +186,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     e.preventDefault();
 
     // Step 1: 基礎情報
-    const capital = Number(formData.capital.replace(/,/g, ""));
+    const capital = Number(formData.capital.replace(/,/g, "") ) ;
     const issuedShares = Number(formData.issuedShares.replace(/,/g, ""));
 
     // Step 2: 会社規模（千円を円に変換）

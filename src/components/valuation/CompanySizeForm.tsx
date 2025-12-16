@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { calculateCompanySizeAndL, IndustryType } from "@/lib/valuation-logic";
 import { BasicInfo } from "@/types/valuation";
 import { Button } from "@/components/ui/Button";
@@ -22,9 +22,13 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
         industryType: defaultValues?.industryType as IndustryType || "Wholesale",
     });
 
+    const isInitialMount = useRef(true);
+    const isUpdatingFromDefault = useRef(false);
+
     // Update form data when defaultValues changes (e.g., when coming from Step 1 or Step 3)
     useEffect(() => {
         if (defaultValues) {
+            isUpdatingFromDefault.current = true;
             setFormData({
                 employees: defaultValues?.employees?.toString() || "",
                 totalAssets: defaultValues?.totalAssets ? (defaultValues.totalAssets / 1000).toString() : "",
@@ -36,22 +40,14 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
         const { name, value } = e.target;
-        setFormData((prev) => {
-            const newData = { ...prev, [name]: value };
-            notifyChange(newData);
-            return newData;
-        });
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleIndustryChange = (type: IndustryType) => {
-        setFormData((prev) => {
-            const newData = { ...prev, industryType: type };
-            notifyChange(newData);
-            return newData;
-        });
+        setFormData((prev) => ({ ...prev, industryType: type }));
     };
 
-    const notifyChange = (data: typeof formData) => {
+    const notifyChange = useCallback((data: typeof formData) => {
         if (onChange) {
             // Only notify if there's actual data to save
             // Don't overwrite with empty/zero values
@@ -86,7 +82,20 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
                 onChange(updateData);
             }
         }
-    };
+    }, [onChange]);
+
+    // Notify parent of changes when formData updates (skip initial mount and updates from defaultValues)
+    useEffect(() => {
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+        if (isUpdatingFromDefault.current) {
+            isUpdatingFromDefault.current = false;
+            return;
+        }
+        notifyChange(formData);
+    }, [formData, notifyChange]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

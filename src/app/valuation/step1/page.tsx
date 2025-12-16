@@ -23,15 +23,26 @@ export default function Step1Page() {
     }, []);
 
     const handleNext = (data: Partial<BasicInfo>, dummyDataKey?: DummyDataPatternKey) => {
+        // Load existing data from sessionStorage
+        const existingData = sessionStorage.getItem("valuationBasicInfo");
+        let existingBasicInfo: Partial<BasicInfo> = {};
+        if (existingData) {
+            try {
+                existingBasicInfo = JSON.parse(existingData);
+            } catch (e) {
+                console.error("Failed to parse existing data:", e);
+            }
+        }
+
         // If dummy data was selected, merge all data
-        let basicInfoToSave = data;
+        let basicInfoToSave = { ...existingBasicInfo, ...data };
 
         if (dummyDataKey) {
             const pattern = DUMMY_DATA_PATTERNS[dummyDataKey];
 
             // Merge Step 2 data into basic info
             basicInfoToSave = {
-                ...data,
+                ...basicInfoToSave,
                 employees: pattern.employees,
                 totalAssets: pattern.totalAssets,
                 sales: pattern.sales,

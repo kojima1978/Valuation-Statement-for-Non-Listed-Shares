@@ -166,82 +166,144 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
                             <h3 className="text-sm font-bold text-green-900">計算結果：純資産価額の計算結果 (リアルタイムプレビュー)</h3>
                         </div>
                         <div className="space-y-2">
-                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
-                                <span className="text-sm text-muted-foreground">相続税評価額ベースの純資産</span>
-                                <span className="font-bold">
-                                    {(() => {
-                                        const assets = Number(formData.assetsInheritanceValue) * 1000;
-                                        const liabilities = Number(formData.liabilitiesInheritanceValue) * 1000;
-                                        return (assets - liabilities).toLocaleString();
-                                    })()} 円
-                                </span>
+                            <div className="border-b border-primary/10 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">相続税評価額ベースの純資産</span>
+                                    <span className="font-bold">
+                                        {(() => {
+                                            const assets = Number(formData.assetsInheritanceValue);
+                                            const liabilities = Number(formData.liabilitiesInheritanceValue);
+                                            const netAsset = assets - liabilities;
+                                            return Math.max(0, netAsset).toLocaleString();
+                                        })()} 千円
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground text-right mt-1">
+                                    ({Number(formData.assetsInheritanceValue).toLocaleString()} - {Number(formData.liabilitiesInheritanceValue).toLocaleString()})千円
+                                </div>
                             </div>
-                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
-                                <span className="text-sm text-muted-foreground">帳簿価額ベースの純資産</span>
-                                <span className="font-bold">
-                                    {(() => {
-                                        const assets = Number(formData.assetsBookValue) * 1000;
-                                        const liabilities = Number(formData.liabilitiesBookValue) * 1000;
-                                        return (assets - liabilities).toLocaleString();
-                                    })()} 円
-                                </span>
+                            <div className="border-b border-primary/10 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">帳簿価額ベースの純資産</span>
+                                    <span className="font-bold">
+                                        {(() => {
+                                            const assets = Number(formData.assetsBookValue);
+                                            const liabilities = Number(formData.liabilitiesBookValue);
+                                            const netAsset = assets - liabilities;
+                                            return Math.max(0, netAsset).toLocaleString();
+                                        })()} 千円
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground text-right mt-1">
+                                    ({Number(formData.assetsBookValue).toLocaleString()} - {Number(formData.liabilitiesBookValue).toLocaleString()})千円
+                                </div>
                             </div>
-                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
-                                <span className="text-sm text-muted-foreground">評価差額に相当する金額</span>
-                                <span className="font-bold">
-                                    {(() => {
-                                        const assetsInh = Number(formData.assetsInheritanceValue) * 1000;
-                                        const liabInh = Number(formData.liabilitiesInheritanceValue) * 1000;
-                                        const netInh = assetsInh - liabInh;
+                            <div className="border-b border-primary/10 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">評価差額に相当する金額</span>
+                                    <span className="font-bold">
+                                        {(() => {
+                                            const assetsInh = Number(formData.assetsInheritanceValue);
+                                            const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                            const netInh = Math.max(0, assetsInh - liabInh);
 
-                                        const assetsBook = Number(formData.assetsBookValue) * 1000;
-                                        const liabBook = Number(formData.liabilitiesBookValue) * 1000;
-                                        const netBook = assetsBook - liabBook;
+                                            const assetsBook = Number(formData.assetsBookValue);
+                                            const liabBook = Number(formData.liabilitiesBookValue);
+                                            const netBook = Math.max(0, assetsBook - liabBook);
+
+                                            const diff = netInh - netBook;
+                                            if (diff <= 0) return "0";
+                                            return diff.toLocaleString();
+                                        })()} 千円
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground text-right mt-1">
+                                    {(() => {
+                                        const assetsInh = Number(formData.assetsInheritanceValue);
+                                        const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                        const netInh = Math.max(0, assetsInh - liabInh);
+
+                                        const assetsBook = Number(formData.assetsBookValue);
+                                        const liabBook = Number(formData.liabilitiesBookValue);
+                                        const netBook = Math.max(0, assetsBook - liabBook);
+
+                                        return `(${netInh.toLocaleString()} - ${netBook.toLocaleString()})千円`;
+                                    })()}
+                                </div>
+                            </div>
+                            <div className="border-b border-primary/10 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">評価差額に対する法人税額等 (37%)</span>
+                                    <span className="font-bold text-red-500">
+                                        ▲ {(() => {
+                                            const assetsInh = Number(formData.assetsInheritanceValue);
+                                            const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                            const netInh = Math.max(0, assetsInh - liabInh);
+
+                                            const assetsBook = Number(formData.assetsBookValue);
+                                            const liabBook = Number(formData.liabilitiesBookValue);
+                                            const netBook = Math.max(0, assetsBook - liabBook);
+
+                                            const diff = netInh - netBook;
+                                            if (diff <= 0) return "0";
+                                            return Math.floor(diff * 0.37).toLocaleString();
+                                        })()} 千円
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground text-right mt-1">
+                                    {(() => {
+                                        const assetsInh = Number(formData.assetsInheritanceValue);
+                                        const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                        const netInh = Math.max(0, assetsInh - liabInh);
+
+                                        const assetsBook = Number(formData.assetsBookValue);
+                                        const liabBook = Number(formData.liabilitiesBookValue);
+                                        const netBook = Math.max(0, assetsBook - liabBook);
 
                                         const diff = netInh - netBook;
-                                        if (diff <= 0) return "0";
-                                        return diff.toLocaleString();
-                                    })()} 円
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
-                                <span className="text-sm text-muted-foreground">評価差額に対する法人税額等 (37%)</span>
-                                <span className="font-bold text-red-500">
-                                    ▲ {(() => {
-                                        const assetsInh = Number(formData.assetsInheritanceValue) * 1000;
-                                        const liabInh = Number(formData.liabilitiesInheritanceValue) * 1000;
-                                        const netInh = assetsInh - liabInh;
-
-                                        const assetsBook = Number(formData.assetsBookValue) * 1000;
-                                        const liabBook = Number(formData.liabilitiesBookValue) * 1000;
-                                        const netBook = assetsBook - liabBook;
-
-                                        const diff = netInh - netBook;
-                                        if (diff <= 0) return "0";
-                                        return Math.floor(diff * 0.37).toLocaleString();
-                                    })()} 円
-                                </span>
+                                        if (diff <= 0) return "(0 * 37%)千円";
+                                        return `(${diff.toLocaleString()} * 37%)千円`;
+                                    })()}
+                                </div>
                             </div>
 
-                            <div className="flex items-center justify-between border-b border-primary/10 pb-2">
-                                <span className="text-sm text-muted-foreground">相続税評価額ベースの純資産（法人税額控除後）</span>
-                                <span className="font-bold text-foreground">
+                            <div className="border-b border-primary/10 pb-2">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-muted-foreground">（法人税額控除後）相続税評価額ベースの純資産</span>
+                                    <span className="font-bold text-foreground">
+                                        {(() => {
+                                            const assetsInh = Number(formData.assetsInheritanceValue);
+                                            const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                            const netInh = Math.max(0, assetsInh - liabInh);
+
+                                            const assetsBook = Number(formData.assetsBookValue);
+                                            const liabBook = Number(formData.liabilitiesBookValue);
+                                            const netBook = Math.max(0, assetsBook - liabBook);
+
+                                            const diff = netInh - netBook;
+                                            const tax = diff > 0 ? Math.floor(diff * 0.37) : 0;
+                                            const netAfterTax = netInh - tax;
+
+                                            return netAfterTax.toLocaleString();
+                                        })()} 千円
+                                    </span>
+                                </div>
+                                <div className="text-xs text-muted-foreground text-right mt-1">
                                     {(() => {
-                                        const assetsInh = Number(formData.assetsInheritanceValue) * 1000;
-                                        const liabInh = Number(formData.liabilitiesInheritanceValue) * 1000;
-                                        const netInh = assetsInh - liabInh;
+                                        const assetsInh = Number(formData.assetsInheritanceValue);
+                                        const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                        const netInh = Math.max(0, assetsInh - liabInh);
 
-                                        const assetsBook = Number(formData.assetsBookValue) * 1000;
-                                        const liabBook = Number(formData.liabilitiesBookValue) * 1000;
-                                        const netBook = assetsBook - liabBook;
+                                        const assetsBook = Number(formData.assetsBookValue);
+                                        const liabBook = Number(formData.liabilitiesBookValue);
+                                        const netBook = Math.max(0, assetsBook - liabBook);
 
                                         const diff = netInh - netBook;
                                         const tax = diff > 0 ? Math.floor(diff * 0.37) : 0;
-                                        const netAfterTax = netInh - tax;
 
-                                        return netAfterTax.toLocaleString();
-                                    })()} 円
-                                </span>
+                                        return `(${netInh.toLocaleString()} - ${tax.toLocaleString()})千円`;
+                                    })()}
+                                </div>
                             </div>
 
                             <div className="flex items-center justify-between pt-2">
@@ -252,21 +314,21 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
                                 </div>
                                 <p className="text-2xl font-black text-primary">
                                     {(() => {
-                                        const assetsInh = Number(formData.assetsInheritanceValue) * 1000;
-                                        const liabInh = Number(formData.liabilitiesInheritanceValue) * 1000;
-                                        const netInh = assetsInh - liabInh;
+                                        const assetsInh = Number(formData.assetsInheritanceValue);
+                                        const liabInh = Number(formData.liabilitiesInheritanceValue);
+                                        const netInh = Math.max(0, assetsInh - liabInh);
 
-                                        const assetsBook = Number(formData.assetsBookValue) * 1000;
-                                        const liabBook = Number(formData.liabilitiesBookValue) * 1000;
-                                        const netBook = assetsBook - liabBook;
+                                        const assetsBook = Number(formData.assetsBookValue);
+                                        const liabBook = Number(formData.liabilitiesBookValue);
+                                        const netBook = Math.max(0, assetsBook - liabBook);
 
                                         const diff = netInh - netBook;
-                                        const tax = diff > 0 ? diff * 0.37 : 0;
+                                        const tax = diff > 0 ? Math.floor(diff * 0.37) : 0;
 
                                         const totalNetAsset = netInh - tax;
                                         const shares = basicInfo.issuedShares || 1;
 
-                                        return Math.floor(totalNetAsset / shares).toLocaleString();
+                                        return Math.floor((totalNetAsset * 1000) / shares).toLocaleString();
                                     })()} <span className="text-sm font-normal text-muted-foreground">円</span>
                                 </p>
                             </div>

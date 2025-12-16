@@ -8,7 +8,6 @@ import { BasicInfo } from "@/types/valuation";
 export default function Step2Page() {
     const router = useRouter();
     const [basicInfo, setBasicInfo] = useState<BasicInfo | Partial<BasicInfo> | null>(null);
-    const [currentFormData, setCurrentFormData] = useState<Partial<BasicInfo> | null>(null);
 
     useEffect(() => {
         // Load saved data from sessionStorage
@@ -17,7 +16,6 @@ export default function Step2Page() {
             try {
                 const parsedData = JSON.parse(saved);
                 setBasicInfo(parsedData);
-                setCurrentFormData(parsedData);
             } catch (e) {
                 console.error("Failed to parse saved data:", e);
                 router.push("/valuation/step1");
@@ -36,17 +34,11 @@ export default function Step2Page() {
     };
 
     const handleBack = () => {
-        // Save current form data before going back
-        if (currentFormData) {
-            const merged = { ...basicInfo, ...currentFormData };
-            sessionStorage.setItem("valuationBasicInfo", JSON.stringify(merged));
-        }
         router.push("/valuation/step1");
     };
 
     const handleFormChange = (data: Partial<BasicInfo>) => {
-        setCurrentFormData(data);
-        // Save to sessionStorage immediately
+        // Save to sessionStorage immediately without updating state
         const merged = { ...basicInfo, ...data };
         sessionStorage.setItem("valuationBasicInfo", JSON.stringify(merged));
     };

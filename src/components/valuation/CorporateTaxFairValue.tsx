@@ -86,7 +86,7 @@ export function CorporateTaxFairValue({ basicInfo, financials, onBack, onNext }:
                                 return (
                                     <div className="space-y-2">
                                         <p className="font-semibold text-foreground">比準要素数0の会社</p>
-                                        <p className="text-muted-foreground">純資産価額</p>
+                                        <p className="text-muted-foreground">純資産価額（法人税控除しない）</p>
                                         <p className="text-foreground pl-4">{N.toLocaleString()}円</p>
                                     </div>
                                 );
@@ -103,7 +103,7 @@ export function CorporateTaxFairValue({ basicInfo, financials, onBack, onNext }:
                                             <p className="text-muted-foreground">イ　（類似業種比準価額 × 0.25）＋（純資産価額 × 0.75）</p>
                                             <p className="text-foreground pl-6">= ({S.toLocaleString()} × 0.25) + ({N.toLocaleString()} × 0.75)</p>
                                             <p className="text-foreground pl-6">= {blended.toLocaleString()}円</p>
-                                            <p className="text-muted-foreground mt-2">ロ　純資産価額</p>
+                                            <p className="text-muted-foreground mt-2">ロ　純資産価額（法人税控除しない）</p>
                                             <p className="text-foreground pl-6">= {N.toLocaleString()}円</p>
                                         </div>
                                     </div>
@@ -117,7 +117,7 @@ export function CorporateTaxFairValue({ basicInfo, financials, onBack, onNext }:
                                     <p className="font-semibold text-foreground">法人税法上の時価（小会社の株式の価額）</p>
                                     <p className="text-muted-foreground">次のうちいずれか低い方の金額</p>
                                     <div className="pl-4 space-y-1">
-                                        <p className="text-muted-foreground">イ　純資産価額</p>
+                                        <p className="text-muted-foreground">イ　純資産価額（法人税控除しない）</p>
                                         <p className="text-foreground pl-6">{N.toLocaleString()}円</p>
                                         <p className="text-muted-foreground mt-2">ロ　（類似業種比準価額 × 0.50）＋（純資産価額 × 0.50）</p>
                                         <p className="text-foreground pl-6">= ({S.toLocaleString()} × 0.50) + ({N.toLocaleString()} × 0.50)</p>

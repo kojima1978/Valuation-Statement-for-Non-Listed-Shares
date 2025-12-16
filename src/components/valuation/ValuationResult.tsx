@@ -142,17 +142,15 @@ export function ValuationResult({ basicInfo, financials, onBack, onNext }: Valua
 
                             // 中会社
                             if (results.size === "Medium") {
-                                const blended = Math.floor(S * L + N * (1 - L));
+                                const minValue = Math.min(S, N);
+                                const blended = Math.floor(minValue * L + N * (1 - L));
                                 return (
                                     <div className="space-y-2">
                                         <p className="font-semibold text-foreground">中会社の株式の価額 (L={L})</p>
-                                        <p className="text-muted-foreground">次のうちいずれか低い方の金額</p>
-                                        <div className="pl-4 space-y-1">
-                                            <p className="text-muted-foreground">イ　（類似業種比準価額 × {L}）＋（純資産価額 × {(1-L).toFixed(2)}）</p>
-                                            <p className="text-foreground pl-6">= ({S.toLocaleString()} × {L}) + ({N.toLocaleString()} × {(1-L).toFixed(2)})</p>
+                                        <p className="text-muted-foreground">（「類似業種比準価額」と「純資産価額」いずれか低い方）× L ＋ 純資産価額 × (1 - L)</p>
+                                        <div className="pl-4 space-y-1 mt-2">
+                                            <p className="text-muted-foreground">({minValue.toLocaleString()} × {L}) ＋ ({N.toLocaleString()} × {(1-L).toFixed(2)})</p>
                                             <p className="text-foreground pl-6">= {blended.toLocaleString()}円</p>
-                                            <p className="text-muted-foreground mt-2">ロ　純資産価額</p>
-                                            <p className="text-foreground pl-6">{N.toLocaleString()}円</p>
                                         </div>
                                     </div>
                                 );

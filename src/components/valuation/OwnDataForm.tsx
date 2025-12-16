@@ -74,20 +74,26 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
         const profitPrevAmount = (p1 + l1) * 1000;
         const profit2PrevAmount = (p2 + l2) * 1000;
+        const profit3PrevAmount = (p3 + l3) * 1000;
 
         const profitPerSharePrev = profitPrevAmount / shareCount50;
         const profitPerShareAvg = ((profitPrevAmount + profit2PrevAmount) / 2) / shareCount50;
 
         // Calculate individual profit values (整数に切り捨て)
-        const profitC1Value = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
-        const profitC2Value = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
+        // For c1 selection
+        const profitC1Single = Math.floor(Math.max(0, profitPerSharePrev)); // c1の「直前」: 直前期
+        const profitC1Avg = Math.floor(Math.max(0, profitPerShareAvg)); // c1の「2年平均」: 直前期と2期前の平均
+
+        // For c2 selection
+        const profitC2Single = Math.floor(Math.max(0, profit2PrevAmount / shareCount50)); // c2の「直前」: 2期前
+        const profitC2Avg = Math.floor(Math.max(0, ((profit2PrevAmount + profit3PrevAmount) / 2) / shareCount50)); // c2の「2年平均」: 2期前と3期前の平均
 
         // c: Main profit value based on selection
         let ownProfit: number;
         if (profitMethodC === "c1") {
-            ownProfit = profitC1Value;
+            ownProfit = profitC1Single;
         } else if (profitMethodC === "c2") {
-            ownProfit = profitC2Value;
+            ownProfit = profitC1Avg;
         } else {
             // auto: 最も低い値を自動選択
             ownProfit = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
@@ -116,23 +122,23 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
         // c1: Based on user selection
         let ownProfitC1: number;
         if (profitMethodC1 === "c1") {
-            ownProfitC1 = profitC1Value;
+            ownProfitC1 = profitC1Single; // 直前期
         } else if (profitMethodC1 === "c2") {
-            ownProfitC1 = profitC2Value;
+            ownProfitC1 = profitC1Avg; // 直前期と2期前の平均
         } else {
-            // auto: デフォルトでc1（直前期）
-            ownProfitC1 = profitC1Value;
+            // auto: 直前期と2年平均の少ない方
+            ownProfitC1 = Math.min(profitC1Single, profitC1Avg);
         }
 
         // c2: Based on user selection
         let ownProfitC2: number;
         if (profitMethodC2 === "c1") {
-            ownProfitC2 = profitC1Value;
+            ownProfitC2 = profitC2Single; // 2期前
         } else if (profitMethodC2 === "c2") {
-            ownProfitC2 = profitC2Value;
+            ownProfitC2 = profitC2Avg; // 2期前と3期前の平均
         } else {
-            // auto: デフォルトでc2（2年平均）
-            ownProfitC2 = profitC2Value;
+            // auto: 2期前と2期前+3期前平均の少ない方
+            ownProfitC2 = Math.min(profitC2Single, profitC2Avg);
         }
 
         // d1: 直前期の純資産価額 (same as ownBookValue)
@@ -613,23 +619,28 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                 // c: Profit - Min(Prev, Avg(Prev, 2Prev))
                                 const p1Val = (Number(formData.ownTaxableIncomePrev) + Number(formData.ownCarryForwardLossPrev)) * 1000;
                                 const p2Val = (Number(formData.ownTaxableIncome2Prev) + Number(formData.ownCarryForwardLoss2Prev)) * 1000;
-                                // const p3Val = ... (unused for logic)
+                                const p3Val = (Number(formData.ownTaxableIncome3Prev) + Number(formData.ownCarryForwardLoss3Prev)) * 1000;
 
                                 const profitPerSharePrev = p1Val / shareCount50;
                                 const profitPerShareAvg = ((p1Val + p2Val) / 2) / shareCount50;
 
                                 // Calculate individual profit values (整数に切り捨て)
-                                const profitC1Val = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
-                                const profitC2Val = Math.floor(Math.max(0, profitPerShareAvg)); // 2年平均
+                                // For c1 selection
+                                const profitC1Single = Math.floor(Math.max(0, profitPerSharePrev)); // c1の「直前」: 直前期
+                                const profitC1Avg = Math.floor(Math.max(0, profitPerShareAvg)); // c1の「2年平均」: 直前期と2期前の平均
+
+                                // For c2 selection
+                                const profitC2Single = Math.floor(Math.max(0, p2Val / shareCount50)); // c2の「直前」: 2期前
+                                const profitC2Avg = Math.floor(Math.max(0, ((p2Val + p3Val) / 2) / shareCount50)); // c2の「2年平均」: 2期前と3期前の平均
 
                                 // c: Main profit value based on selection
                                 let c: number;
                                 let cMethod: string;
                                 if (profitMethodC === "c1") {
-                                    c = profitC1Val;
+                                    c = profitC1Single;
                                     cMethod = "直前";
                                 } else if (profitMethodC === "c2") {
-                                    c = profitC2Val;
+                                    c = profitC1Avg;
                                     cMethod = "2年平均";
                                 } else {
                                     c = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
@@ -640,13 +651,13 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                 let c1Display: number;
                                 let c1Method: string;
                                 if (profitMethodC1 === "c1") {
-                                    c1Display = profitC1Val;
+                                    c1Display = profitC1Single; // 直前期
                                     c1Method = "直前";
                                 } else if (profitMethodC1 === "c2") {
-                                    c1Display = profitC2Val;
+                                    c1Display = profitC1Avg; // 直前期と2期前の平均
                                     c1Method = "2年平均";
                                 } else {
-                                    c1Display = profitC1Val; // デフォルトc1
+                                    c1Display = Math.min(profitC1Single, profitC1Avg); // 自動: 少ない方
                                     c1Method = "自動";
                                 }
 
@@ -654,13 +665,13 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                 let c2Display: number;
                                 let c2Method: string;
                                 if (profitMethodC2 === "c1") {
-                                    c2Display = profitC1Val;
+                                    c2Display = profitC2Single; // 2期前
                                     c2Method = "直前";
                                 } else if (profitMethodC2 === "c2") {
-                                    c2Display = profitC2Val;
+                                    c2Display = profitC2Avg; // 2期前と3期前の平均
                                     c2Method = "2年平均";
                                 } else {
-                                    c2Display = profitC2Val; // デフォルトc2
+                                    c2Display = Math.min(profitC2Single, profitC2Avg); // 自動: 少ない方
                                     c2Method = "自動";
                                 }
 
@@ -691,7 +702,9 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                     <div className="space-y-4">
                                         {/* 上段: b, c, d */}
                                         <div className="space-y-2">
-                                            <div className="flex justify-between items-center">
+                                            <h5 className="text-xs font-semibold text-black">類似業種比準価額の要素</h5>
+
+                                            <div className="flex justify-between items-center pl-4">
                                                 <span className="text-muted-foreground whitespace-nowrap">1株当たりの配当金額 (b)</span>
 
                                                 <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
@@ -704,11 +717,16 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                                 </div>
                                             </div>
 
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items-center pl-4">
                                                 <span className="text-muted-foreground whitespace-nowrap">1株当たりの利益金額 (c)</span>
 
                                                 <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
-                                                    {cMethod}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                    {cMethod === "自動"
+                                                        ? `自動 直前期:${(p1Val / 1000).toLocaleString()}千円÷${shareCount50.toLocaleString()}株=${profitC1Single}円 or 2年平均:(${(p1Val / 1000).toLocaleString()}+${(p2Val / 1000).toLocaleString()})千円÷2÷${shareCount50.toLocaleString()}株=${profitC1Avg}円`
+                                                        : cMethod === "直前"
+                                                        ? `直前期: ${(p1Val / 1000).toLocaleString()}千円 ÷ ${shareCount50.toLocaleString()}株`
+                                                        : `2年平均: (${(p1Val / 1000).toLocaleString()}+${(p2Val / 1000).toLocaleString()})千円 ÷ 2 ÷ ${shareCount50.toLocaleString()}株`
+                                                    } =
                                                 </div>
 
                                                 <div className="text-right whitespace-nowrap">
@@ -717,7 +735,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                                 </div>
                                             </div>
 
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex justify-between items-center pl-4">
                                                 <span className="text-muted-foreground whitespace-nowrap">1株当たりの純資産価額 (d)</span>
 
                                                 <div className="text-[10px] text-muted-foreground px-2 text-right flex-1">
@@ -737,14 +755,14 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">（1株当たりの配当金額）b1:</span>
+                                                    <span className="text-black whitespace-nowrap">1株当たりの配当金額（b1）:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownDividendPrev).toLocaleString()} + {Number(formData.ownDividend2Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
                                                     <span className={`font-semibold whitespace-nowrap ${b1 === 0 ? 'text-red-600' : 'text-black'}`}>{b1.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-blue-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">（1株当たりの配当金額）b2:</span>
+                                                    <span className="text-black whitespace-nowrap">1株当たりの配当金額（b2）:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownDividend2Prev).toLocaleString()} + {Number(formData.ownDividend3Prev).toLocaleString()})千円 ÷ 2 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
@@ -754,31 +772,41 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">（1株当たりの利益金額）c1:</span>
+                                                    <span className="text-black whitespace-nowrap">1株当たりの利益金額（c1）:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
-                                                        {c1Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                        {c1Method === "自動"
+                                                            ? `自動 直前期:${(p1Val / 1000).toLocaleString()}千円÷${shareCount50.toLocaleString()}株=${profitC1Single}円 or 2年平均:(${(p1Val / 1000).toLocaleString()}+${(p2Val / 1000).toLocaleString()})千円÷2÷${shareCount50.toLocaleString()}株=${profitC1Avg}円`
+                                                            : c1Method === "直前"
+                                                            ? `直前期: ${(p1Val / 1000).toLocaleString()}千円 ÷ ${shareCount50.toLocaleString()}株 = ${profitC1Single}円`
+                                                            : `2年平均: (${(p1Val / 1000).toLocaleString()}+${(p2Val / 1000).toLocaleString()})千円 ÷ 2 ÷ ${shareCount50.toLocaleString()}株 = ${profitC1Avg}円`
+                                                        }
                                                     </div>
-                                                    <span className={`font-semibold whitespace-nowrap ${c1 === 0 ? 'text-red-600' : 'text-black'}`}>{c1.toLocaleString()}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${c1Display === 0 ? 'text-red-600' : 'text-black'}`}>{c1Display.toLocaleString()}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">（1株当たりの利益金額）c2:</span>
+                                                    <span className="text-black whitespace-nowrap">1株当たりの利益金額（c2）:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
-                                                        {c2Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                        {c2Method === "自動"
+                                                            ? `自動 2期前:${(p2Val / 1000).toLocaleString()}千円÷${shareCount50.toLocaleString()}株=${profitC2Single}円 or 2年平均:(${(p2Val / 1000).toLocaleString()}+${(p3Val / 1000).toLocaleString()})千円÷2÷${shareCount50.toLocaleString()}株=${profitC2Avg}円`
+                                                            : c2Method === "直前"
+                                                            ? `2期前: ${(p2Val / 1000).toLocaleString()}千円 ÷ ${shareCount50.toLocaleString()}株 = ${profitC2Single}円`
+                                                            : `2年平均: (${(p2Val / 1000).toLocaleString()}+${(p3Val / 1000).toLocaleString()})千円 ÷ 2 ÷ ${shareCount50.toLocaleString()}株 = ${profitC2Avg}円`
+                                                        }
                                                     </div>
-                                                    <span className={`font-semibold whitespace-nowrap ${c2 === 0 ? 'text-red-600' : 'text-black'}`}>{c2.toLocaleString()}円</span>
+                                                    <span className={`font-semibold whitespace-nowrap ${c2Display === 0 ? 'text-red-600' : 'text-black'}`}>{c2Display.toLocaleString()}円</span>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">（1株当たりの純資産価額）d1:</span>
+                                                    <span className="text-black whitespace-nowrap">1株当たりの純資産価額（d1）:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownCapitalPrev).toLocaleString()} + {Number(formData.ownRetainedEarningsPrev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
                                                     <span className={`font-semibold whitespace-nowrap ${d1 === 0 ? 'text-red-600' : 'text-black'}`}>{d1.toLocaleString()}円</span>
                                                 </div>
                                                 <div className="flex justify-between items-center bg-purple-50/50 p-2 rounded text-xs">
-                                                    <span className="text-black whitespace-nowrap">（1株当たりの純資産価額）d2:</span>
+                                                    <span className="text-black whitespace-nowrap">1株当たりの純資産価額（d2）:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
                                                         ({Number(formData.ownCapital2Prev).toLocaleString()} + {Number(formData.ownRetainedEarnings2Prev).toLocaleString()})千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>

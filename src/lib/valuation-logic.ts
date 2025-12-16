@@ -299,8 +299,8 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
     }
 
     // 1. Net Asset Value per Share (N)
-    const netInh = assetsInheritanceValue - liabilitiesInheritanceValue;
-    const netBook = assetsBookValue - liabilitiesBookValue;
+    const netInh = Math.max(0, assetsInheritanceValue - liabilitiesInheritanceValue);
+    const netBook = Math.max(0, assetsBookValue - liabilitiesBookValue);
 
     const evalDiff = netInh - netBook;
     const tax = evalDiff > 0 ? evalDiff * 0.37 : 0;
@@ -363,12 +363,11 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
     }
     // 比準要素数1の会社の場合（優先順位2）
     else if (financials.isOneElementCompany) {
-        // TODO: 比準要素数1の計算方法は後ほど実装
-        // 現時点では純資産価額を使用
-        finalValue = N;
-        methodDescription = "比準要素数1の会社 (特別計算)";
+        const blended = (S * 0.25) + (N * 0.75);
+        finalValue = Math.min(blended, N);
+        methodDescription = "比準要素数1の会社 ((S×0.25 + N×0.75)とNのいずれか低い方)";
         comparisonDetails = [
-            { name: "比準要素数1", value: Math.floor(N) }
+            { name: "比準要素数1", value: Math.floor(finalValue) }
         ];
     }
     // 一般の評価会社（優先順位3）
@@ -385,14 +384,11 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
         ];
     }
     else if (size === "Medium") {
-        const blended = (S * L) + (N * (1 - L));
-        if (blended < N) {
-            finalValue = blended;
-            methodDescription = `併用方式 (L=${L.toFixed(2)})`;
-        } else {
-            finalValue = N;
-            methodDescription = "純資産価額 (選択)";
-        }
+        // 中会社: (min(S, N) × L) + (N × (1 - L))
+        const minValue = Math.min(S, N);
+        const blended = (minValue * L) + (N * (1 - L));
+        finalValue = blended;
+        methodDescription = `併用方式 ((min(S,N)×${L.toFixed(2)})+(N×${(1-L).toFixed(2)}))`;
 
         // L値に応じた表示名を決定
         let mediumLabel = "中会社";

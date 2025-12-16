@@ -378,10 +378,10 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                 <div className="mb-2 p-3 bg-white/50 rounded-lg border border-primary/10">
                                     <div className="text-xs font-semibold text-muted-foreground mb-2 text-center">原株換算</div>
                                     <div className="flex items-center justify-center gap-2 text-xs">
-                                        <span className="text-black">1株当たりの資本金額</span>
                                         <span className="font-bold text-black">
                                             {(((basicInfo.capital || 0) * 1000) / (basicInfo.issuedShares || 1)).toLocaleString(undefined, { maximumFractionDigits: 0 })}円
                                         </span>
+                                        <span className="text-black">（1株当たりの資本金額）</span>
                                         <span className="text-black">/</span>
                                         <span className="font-bold text-black">50円</span>
                                         <span className="text-black">=</span>

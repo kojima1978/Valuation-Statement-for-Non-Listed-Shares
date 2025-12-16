@@ -49,13 +49,13 @@ export interface DummyDataPattern {
 export const DUMMY_DATA_PATTERNS: Record<string, DummyDataPattern> = {
   pattern1: {
     companyName: "株式会社サンプル製造",
-    taxationPeriod: "2024-03-31",
-    previousPeriod: "2024-03-31",
+    taxationPeriod: "2025-02-21",
+    previousPeriod: "2024-07-31",
     capital: 50000,  // 5億円
     issuedShares: 10000,
     employees: 45,
-    totalAssets: 800000,  // 8億円
-    sales: 1200000,  // 12億円
+    totalAssets: 800000000,  // 8億円
+    sales: 1200000000,  // 12億円
     industryType: "Other",
     ownDividendPrev: 5000,
     ownDividend2Prev: 4800,
@@ -79,9 +79,9 @@ export const DUMMY_DATA_PATTERNS: Record<string, DummyDataPattern> = {
     industryProfit: 18,
     industryBookValue: 95,
     assetsBookValue: 800000,
-    assetsInheritanceValue: 850000,
-    liabilitiesBookValue: 630000,
-    liabilitiesInheritanceValue: 630000,
+    assetsInheritanceValue: 8500000000,
+    liabilitiesBookValue: 630000000,
+    liabilitiesInheritanceValue: 630000000,
   },
   pattern2: {
     companyName: "株式会社小売商事",
@@ -90,7 +90,7 @@ export const DUMMY_DATA_PATTERNS: Record<string, DummyDataPattern> = {
     capital: 20000,  // 2億円
     issuedShares: 4000,
     employees: 15,
-    totalAssets: 180000,  // 1.8億円
+    totalAssets: 200000,  // 2億円
     sales: 45000,  // 0.45億円
     industryType: "RetailService",
     ownDividendPrev: 1200,
@@ -114,10 +114,10 @@ export const DUMMY_DATA_PATTERNS: Record<string, DummyDataPattern> = {
     industryDividendsSen: 8,
     industryProfit: 15,
     industryBookValue: 82,
-    assetsBookValue: 180000,
-    assetsInheritanceValue: 195000,
-    liabilitiesBookValue: 125000,
-    liabilitiesInheritanceValue: 125000,
+    assetsBookValue: 200000,
+    assetsInheritanceValue: 230000000,
+    liabilitiesBookValue: 145000000,
+    liabilitiesInheritanceValue: 145000000,
   },
   pattern3: {
     companyName: "株式会社卸売トレーディング",
@@ -151,8 +151,8 @@ export const DUMMY_DATA_PATTERNS: Record<string, DummyDataPattern> = {
     industryProfit: 22,
     industryBookValue: 110,
     assetsBookValue: 2500000,
-    assetsInheritanceValue: 2700000,
-    liabilitiesBookValue: 2050000,
+    assetsInheritanceValue: 2700000000,
+    liabilitiesBookValue: 2050000000,
     liabilitiesInheritanceValue: 2050000,
   },
 };
