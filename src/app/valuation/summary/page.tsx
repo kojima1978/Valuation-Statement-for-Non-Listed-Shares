@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ValuationSummary } from "@/components/valuation/ValuationSummary";
 import { BasicInfo, Financials } from "@/types/valuation";
-import { CorporateTaxFairValue } from "@/components/valuation/CorporateTaxFairValue";
 
-export default function Step7Page() {
+export default function SummaryPage() {
     const router = useRouter();
     const [basicInfo, setBasicInfo] = useState<BasicInfo | null>(null);
     const [financials, setFinancials] = useState<Financials | null>(null);
@@ -30,10 +30,6 @@ export default function Step7Page() {
     }, [router]);
 
     const handleBack = () => {
-        router.push("/valuation/step6");
-    };
-
-    const handleNext = () => {
         router.push("/valuation/step8");
     };
 
@@ -48,11 +44,10 @@ export default function Step7Page() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4 md:p-8">
             <div className="max-w-6xl mx-auto">
-                <CorporateTaxFairValue
+                <ValuationSummary
                     basicInfo={basicInfo}
                     financials={financials}
                     onBack={handleBack}
-                    onNext={handleNext}
                     onHome={handleHome}
                 />
             </div>

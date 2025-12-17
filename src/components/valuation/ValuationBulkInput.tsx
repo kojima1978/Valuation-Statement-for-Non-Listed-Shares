@@ -130,7 +130,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
   };
 
   const handleIndustryChange = (type: IndustryType) => {
-    setFormData(prev => ({ ...prev, industryType: type }));
+    setFormData(prev => ({
+      ...prev,
+      industryType: type,
+      // 医療法人の場合は配当金額を0にする
+      ...(type === "MedicalCorporation" && {
+        ownDividendPrev: "0",
+        ownDividend2Prev: "0",
+        ownDividend3Prev: "0",
+        industryDividendsYen: "0",
+        industryDividendsSen: "0",
+      }),
+    }));
   };
 
   const loadDummyData = (patternKey: DummyDataPatternKey) => {
@@ -506,7 +517,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
           <div className="space-y-2">
             <Label>業種区分</Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleIndustryChange("Wholesale")}
@@ -528,6 +539,17 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                 }`}
               >
                 小売・サービス業
+              </button>
+              <button
+                type="button"
+                onClick={() => handleIndustryChange("MedicalCorporation")}
+                className={`p-3 rounded-lg border-2 transition-all font-bold ${
+                  formData.industryType === "MedicalCorporation"
+                    ? "border-primary bg-white text-primary shadow-sm"
+                    : "border-transparent bg-muted text-muted-foreground hover:bg-white hover:text-primary"
+                }`}
+              >
+                医療法人
               </button>
               <button
                 type="button"
@@ -597,7 +619,14 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
           <h3 className="text-lg font-bold border-b-2 border-primary pb-2">Step 3: 自社データ</h3>
 
           <div className="space-y-2">
-            <Label>配当金額（千円）</Label>
+            <div className="flex items-center justify-between">
+              <Label>配当金額（千円）</Label>
+              {formData.industryType === "MedicalCorporation" && (
+                <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                  医療法人は配当不可のため0円固定
+                </span>
+              )}
+            </div>
             <div className="grid grid-cols-3 gap-2">
               <div>
                 <Label className="text-xs">直前期</Label>
@@ -608,7 +637,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     onChange={handleChange}
                     placeholder="0"
                     required
-                    className="pr-8 text-right"
+                    disabled={formData.industryType === "MedicalCorporation"}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                   <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
                 </div>
@@ -622,7 +652,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     onChange={handleChange}
                     placeholder="0"
                     required
-                    className="pr-8 text-right"
+                    disabled={formData.industryType === "MedicalCorporation"}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                   <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
                 </div>
@@ -636,7 +667,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     onChange={handleChange}
                     placeholder="0"
                     required
-                    className="pr-8 text-right"
+                    disabled={formData.industryType === "MedicalCorporation"}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                   <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
                 </div>
@@ -999,7 +1031,14 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label>B: 配当金額</Label>
+              <div className="flex items-center justify-between">
+                <Label>B: 配当金額</Label>
+                {formData.industryType === "MedicalCorporation" && (
+                  <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    医療法人は配当不可
+                  </span>
+                )}
+              </div>
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <NumberInput
@@ -1007,7 +1046,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     value={formData.industryDividendsYen}
                     onChange={handleChange}
                     placeholder="0"
-                    className="pr-8 text-right"
+                    disabled={formData.industryType === "MedicalCorporation"}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                   <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
                 </div>
@@ -1017,7 +1057,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     value={formData.industryDividendsSen}
                     onChange={handleChange}
                     placeholder="0"
-                    className="pr-8 text-right"
+                    disabled={formData.industryType === "MedicalCorporation"}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                   />
                   <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">銭</span>
                 </div>

@@ -147,7 +147,7 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
 
                             <div className="space-y-2">
                                 <Label>業種区分</Label>
-                                <div className="grid grid-cols-3 gap-2">
+                                <div className="grid grid-cols-2 gap-2">
                                     <button
                                         type="button"
                                         onClick={() => handleIndustryChange("Wholesale")}
@@ -167,6 +167,16 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
                                             }`}
                                     >
                                         小売・サービス業
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleIndustryChange("MedicalCorporation")}
+                                        className={`p-3 rounded-lg border-2 transition-all font-bold ${formData.industryType === "MedicalCorporation"
+                                            ? "border-primary bg-white text-primary shadow-sm"
+                                            : "border-transparent bg-white/50 text-muted-foreground hover:bg-white hover:text-primary"
+                                            }`}
+                                    >
+                                        医療法人
                                     </button>
                                     <button
                                         type="button"

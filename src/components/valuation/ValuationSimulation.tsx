@@ -11,9 +11,11 @@ interface ValuationSimulationProps {
     basicInfo: BasicInfo;
     financials: Financials;
     onBack: () => void;
+    onHome?: () => void;
+    onSummary?: () => void;
 }
 
-export function ValuationSimulation({ basicInfo, financials, onBack }: ValuationSimulationProps) {
+export function ValuationSimulation({ basicInfo, financials, onBack, onHome, onSummary }: ValuationSimulationProps) {
     // Calculation Logic
     const simulationResults = useMemo(() => {
         // 1. Current Valuation
@@ -142,15 +144,20 @@ export function ValuationSimulation({ basicInfo, financials, onBack }: Valuation
 
             </div>
 
-            <div className="flex justify-center gap-4 pt-8">
-                <Button variant="outline" onClick={onBack} size="lg">
+            <div className="flex flex-col-reverse sm:flex-row justify-center gap-4 pt-8">
+                <Button type="button" variant="outline" onClick={onBack} size="lg">
                     戻る
                 </Button>
-                <Link href="/">
-                    <Button variant="ghost" size="lg">
-                        トップへ戻る
+                {onHome && (
+                    <Button type="button" variant="outline" onClick={onHome} size="lg">
+                        トップに戻る
                     </Button>
-                </Link>
+                )}
+                {onSummary && (
+                    <Button type="button" onClick={onSummary} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
+                        まとめを見る
+                    </Button>
+                )}
             </div>
         </div>
     );

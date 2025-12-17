@@ -1,6 +1,6 @@
 import { BasicInfo, Financials } from "@/types/valuation";
 
-export type IndustryType = "Wholesale" | "RetailService" | "Other";
+export type IndustryType = "Wholesale" | "RetailService" | "MedicalCorporation" | "Other";
 
 export type CompanySize = "Big" | "Medium" | "Small";
 
@@ -32,6 +32,7 @@ export function calculateCompanySizeAndL(data: {
     // Sales Major Thresholds for Big
     if (industryType === "Wholesale" && salesMillion >= 3000) isBig = true;
     else if (industryType === "RetailService" && salesMillion >= 2000) isBig = true; // Corrected from 1000 to 2000 based on L-ratio table upper bounds
+    else if (industryType === "MedicalCorporation" && salesMillion >= 2000) isBig = true; // Same as RetailService
     else if (industryType === "Other" && salesMillion >= 1500) isBig = true;
 
     if (isBig) {
@@ -48,6 +49,7 @@ export function calculateCompanySizeAndL(data: {
     let isSmall = false;
     if (industryType === "Wholesale" && salesMillion < 200) isSmall = true;
     else if (industryType === "RetailService" && salesMillion < 60) isSmall = true;
+    else if (industryType === "MedicalCorporation" && salesMillion < 60) isSmall = true; // Same as RetailService
     else if (industryType === "Other" && salesMillion < 100) isSmall = true;
 
     // Additionally, Employee count restriction often applies for Medium L tables (e.g. >5). 
@@ -80,8 +82,8 @@ export function calculateCompanySizeAndL(data: {
         else if (assetsMillion >= 200 && employees > 20) l_assets = Math.max(l_assets, 0.75);
         else if (assetsMillion >= 70 && employees > 5) l_assets = Math.max(l_assets, 0.60);
     }
-    // Retail/Service
-    else if (industryType === "RetailService") {
+    // Retail/Service & Medical Corporation (same criteria)
+    else if (industryType === "RetailService" || industryType === "MedicalCorporation") {
         if (assetsMillion >= 500 && employees > 35) l_assets = 0.90;
         else if (assetsMillion >= 250 && employees > 20) l_assets = Math.max(l_assets, 0.75);
         else if (assetsMillion >= 40 && employees > 5) l_assets = Math.max(l_assets, 0.60);
@@ -102,11 +104,9 @@ export function calculateCompanySizeAndL(data: {
         else if (salesMillion >= 350) l_sales = Math.max(l_sales, 0.75);
         else if (salesMillion >= 200) l_sales = Math.max(l_sales, 0.60);
     }
-    // Retail/Service
-
-    // Retail/Service
-    else if (industryType === "RetailService") {
-        if (salesMillion >= 500) l_sales = 0.90; // Top is < 2000
+    // Retail/Service & Medical Corporation (same criteria)
+    else if (industryType === "RetailService" || industryType === "MedicalCorporation") {
+        if (salesMillion >= 500) l_sales = 0.90; // Top is < 2000 (Big)
         else if (salesMillion >= 250) l_sales = Math.max(l_sales, 0.75);
         else if (salesMillion >= 60) l_sales = Math.max(l_sales, 0.60);
     }
@@ -153,19 +153,34 @@ export function calculateDetailedSimilarIndustryMethod(
     B: number, C: number, D: number,
     b: number, c: number, d: number,
     multiplier: number,
-    basicInfo: { issuedShares: number; capital: number }
+    basicInfo: { issuedShares: number; capital: number; industryType?: IndustryType }
 ): SimilarIndustryResult {
     let S_50_Raw = 0;
     let ratioB = 0, ratioC = 0, ratioD = 0, avgRatio = 0;
 
+    // 医療法人の場合は配当比準を除外して計算
+    const isMedicalCorporation = basicInfo.industryType === "MedicalCorporation";
+
     // Check if denominators are valid (not zero)
-    if (B !== 0 && C !== 0 && D !== 0) {
+    if (C !== 0 && D !== 0) {
         // 小数点以下2位未満を切り捨て
-        ratioB = Math.floor((b / B) * 100) / 100;
+        if (!isMedicalCorporation && B !== 0) {
+            ratioB = Math.floor((b / B) * 100) / 100;
+        } else {
+            // 医療法人またはB=0の場合は配当比準を0にする
+            ratioB = 0;
+        }
         ratioC = Math.floor((c / C) * 100) / 100;
         ratioD = Math.floor((d / D) * 100) / 100;
-        // 比準割合（平均比率）も小数点以下2位未満を切り捨て
-        avgRatio = Math.floor(((ratioB + ratioC + ratioD) / 3) * 100) / 100;
+
+        // 比準割合の計算
+        if (isMedicalCorporation || B === 0) {
+            // 医療法人の場合は（利益比準 + 純資産比準）÷ 2
+            avgRatio = Math.floor(((ratioC + ratioD) / 2) * 100) / 100;
+        } else {
+            // 通常の場合は（配当比準 + 利益比準 + 純資産比準）÷ 3
+            avgRatio = Math.floor(((ratioB + ratioC + ratioD) / 3) * 100) / 100;
+        }
 
         // Raw S_50 (Not floored yet)
         S_50_Raw = A * avgRatio * multiplier;

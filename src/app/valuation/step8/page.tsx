@@ -33,6 +33,14 @@ export default function Step8Page() {
         router.push("/valuation/step7");
     };
 
+    const handleHome = () => {
+        router.push("/");
+    };
+
+    const handleSummary = () => {
+        router.push("/valuation/summary");
+    };
+
     if (!basicInfo || !financials) {
         return null; // Loading state
     }
@@ -44,6 +52,8 @@ export default function Step8Page() {
                     basicInfo={basicInfo}
                     financials={financials}
                     onBack={handleBack}
+                    onHome={handleHome}
+                    onSummary={handleSummary}
                 />
             </div>
         </div>

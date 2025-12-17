@@ -17,6 +17,8 @@ interface IndustryDataFormProps {
 }
 
 export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: IndustryDataFormProps) {
+    const isMedicalCorporation = basicInfo.industryType === "MedicalCorporation";
+
     // Initializer to split dividend into yen and sen if it exists
     const initDiv = defaultValues?.industryDividends || 0;
     const initDivYen = Math.floor(initDiv);
@@ -29,9 +31,9 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
         industryStockPrice2MonthsBefore: defaultValues?.industryStockPrice2MonthsBefore?.toString() || "",
         industryStockPricePrevYearAverage: defaultValues?.industryStockPricePrevYearAverage?.toString() || "",
 
-        // Industry (B) - Split into Yen and Sen (1 decimal place)
-        industryDividendsYen: initDiv > 0 ? initDivYen.toString() : "",
-        industryDividendsSen: initDiv > 0 ? initDivSen.toString() : "",
+        // Industry (B) - Split into Yen and Sen (1 decimal place) - 医療法人の場合は0
+        industryDividendsYen: isMedicalCorporation ? "0" : (initDiv > 0 ? initDivYen.toString() : ""),
+        industryDividendsSen: isMedicalCorporation ? "0" : (initDiv > 0 ? initDivSen.toString() : ""),
 
         // Industry (C, D)
         industryProfit: defaultValues?.industryProfit?.toString() || "",
@@ -96,7 +98,9 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
         const C_ind = Number(formData.industryProfit);
         const D_ind = Number(formData.industryBookValue);
 
-        if (B_ind === 0 || C_ind === 0 || D_ind === 0) return null;
+        // 医療法人の場合はB_ind=0でも計算可能、それ以外の場合はB_ind=0なら計算不可
+        if (C_ind === 0 || D_ind === 0) return null;
+        if (!isMedicalCorporation && B_ind === 0) return null;
 
         // Own Data (b, c, d) - from defaultValues
         const b_own = defaultValues?.ownDividends || 0;
@@ -228,7 +232,14 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
-                                    <Label>B: 配当</Label>
+                                    <div className="flex items-center justify-between">
+                                        <Label>B: 配当</Label>
+                                        {isMedicalCorporation && (
+                                            <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                                医療法人は配当不可
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="flex gap-2 items-center">
                                         <div className="relative flex-1">
                                             <NumberInput
@@ -236,7 +247,8 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                                 placeholder="0"
                                                 value={formData.industryDividendsYen}
                                                 onChange={handleChange}
-                                                className="pr-8 text-right bg-white"
+                                                disabled={isMedicalCorporation}
+                                                className={`pr-8 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                             />
                                             <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
                                         </div>
@@ -246,7 +258,8 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                                 placeholder="0"
                                                 value={formData.industryDividendsSen}
                                                 onChange={handleChange}
-                                                className="pr-8 text-right bg-white"
+                                                disabled={isMedicalCorporation}
+                                                className={`pr-8 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                             />
                                             <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">銭</span>
                                         </div>
@@ -295,17 +308,20 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                             <div className="space-y-4">
                                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
 
-                                    <div className="bg-white/50 p-2 rounded relative overflow-hidden">
-                                        <div className="text-muted-foreground">配当比準 (b/B)</div>
+                                    <div className={`bg-white/50 p-2 rounded relative overflow-hidden ${isMedicalCorporation ? 'opacity-50' : ''}`}>
+                                        <div className="text-muted-foreground">
+                                            配当比準 (b/B)
+                                            {isMedicalCorporation && <div className="text-[9px] text-amber-700">(医療法人は除外)</div>}
+                                        </div>
                                         <div className="font-bold flex items-center justify-center gap-1">
                                             {details.ratios.b.toFixed(1)} / {details.ratios.B.toFixed(1)} = {details.ratios.ratioB.toFixed(2)}
-                                            {details.ratios.ratioB > 1 && (
+                                            {!isMedicalCorporation && details.ratios.ratioB > 1 && (
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500 animate-pulse">
                                                     <path d="m5 12 7-7 7 7" />
                                                     <path d="M12 19V5" />
                                                 </svg>
                                             )}
-                                            {details.ratios.ratioB < 1 && (
+                                            {!isMedicalCorporation && details.ratios.ratioB < 1 && details.ratios.ratioB > 0 && (
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 animate-pulse">
                                                     <path d="M12 5v14" />
                                                     <path d="m19 12-7 7-7-7" />
@@ -352,7 +368,11 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                 </div>
 
                                 <div className="flex items-center justify-center text-xs text-muted-foreground gap-2">
-                                    <span>比準割合: {details.ratios.avgRatio.toFixed(2)}</span>
+                                    <span>
+                                        比準割合: {details.ratios.avgRatio.toFixed(2)}
+                                        {isMedicalCorporation && <span className="text-amber-700 ml-1">（利益比準 + 純資産比準）÷ 2</span>}
+                                        {!isMedicalCorporation && <span className="ml-1">（配当比準 + 利益比準 + 純資産比準）÷ 3</span>}
+                                    </span>
                                 </div>
 
                                 {/* 会社規模に応じた斟酌率の表示 */}

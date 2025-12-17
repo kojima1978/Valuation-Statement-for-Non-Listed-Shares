@@ -15,14 +15,16 @@ interface OwnDataFormProps {
 }
 
 export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDataFormProps) {
+    const isMedicalCorporation = basicInfo.industryType === "MedicalCorporation";
+
     const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC || "auto");
     const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC1 || "auto");
     const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC2 || "auto");
     const [formData, setFormData] = useState({
         // Dividends (Total Amount in Thousand Yen)
-        ownDividendPrev: defaultValues?.ownDividendPrev?.toString() || "",
-        ownDividend2Prev: defaultValues?.ownDividend2Prev?.toString() || "",
-        ownDividend3Prev: defaultValues?.ownDividend3Prev?.toString() || "",
+        ownDividendPrev: isMedicalCorporation ? "0" : (defaultValues?.ownDividendPrev?.toString() || ""),
+        ownDividend2Prev: isMedicalCorporation ? "0" : (defaultValues?.ownDividend2Prev?.toString() || ""),
+        ownDividend3Prev: isMedicalCorporation ? "0" : (defaultValues?.ownDividend3Prev?.toString() || ""),
 
         // Profit Components (Total Amount in Thousand Yen)
         ownTaxableIncomePrev: defaultValues?.ownTaxableIncomePrev?.toString() || "",
@@ -202,9 +204,9 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
     const handleCopyFromPrev = () => {
         setFormData((prev) => ({
             ...prev,
-            // Dividends
-            ownDividend2Prev: prev.ownDividendPrev,
-            ownDividend3Prev: prev.ownDividendPrev,
+            // Dividends (医療法人の場合は0)
+            ownDividend2Prev: isMedicalCorporation ? "0" : prev.ownDividendPrev,
+            ownDividend3Prev: isMedicalCorporation ? "0" : prev.ownDividendPrev,
             // Taxable Income
             ownTaxableIncome2Prev: prev.ownTaxableIncomePrev,
             ownTaxableIncome3Prev: prev.ownTaxableIncomePrev,
@@ -247,7 +249,14 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
                         {/* Dividends */}
                         <div className="space-y-2 bg-blue-50 p-4 rounded-lg border-2 border-blue-200 border-t-0">
-                            <Label>配当金額 (b)</Label>
+                            <div className="flex items-center justify-between">
+                                <Label>配当金額 (b)</Label>
+                                {isMedicalCorporation && (
+                                    <span className="text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                                        医療法人は配当不可のため0円固定
+                                    </span>
+                                )}
+                            </div>
                             <div className="grid grid-cols-3 gap-2">
                                 <div className="space-y-1">
                                     <Label className="text-xs">直前期</Label>
@@ -258,7 +267,8 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                             onChange={handleChange}
                                             value={formData.ownDividendPrev}
                                             required
-                                            className="pr-8 text-right bg-white"
+                                            disabled={isMedicalCorporation}
+                                            className={`pr-8 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                         />
                                         <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
                                     </div>
@@ -272,7 +282,8 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                             onChange={handleChange}
                                             value={formData.ownDividend2Prev}
                                             required
-                                            className="pr-8 text-right bg-white"
+                                            disabled={isMedicalCorporation}
+                                            className={`pr-8 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                         />
                                         <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
                                     </div>
@@ -286,7 +297,8 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                             onChange={handleChange}
                                             value={formData.ownDividend3Prev}
                                             required
-                                            className="pr-8 text-right bg-white"
+                                            disabled={isMedicalCorporation}
+                                            className={`pr-8 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                         />
                                         <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
                                     </div>

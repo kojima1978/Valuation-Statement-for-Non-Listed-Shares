@@ -11,9 +11,10 @@ interface CorporateTaxFairValueProps {
     financials: Financials;
     onBack: () => void;
     onNext: () => void;
+    onHome?: () => void;
 }
 
-export function CorporateTaxFairValue({ basicInfo, financials, onBack, onNext }: CorporateTaxFairValueProps) {
+export function CorporateTaxFairValue({ basicInfo, financials, onBack, onNext, onHome }: CorporateTaxFairValueProps) {
     const results = useMemo(() => {
         return calculateCorporateTaxFairValue(basicInfo, financials);
     }, [basicInfo, financials]);
@@ -134,6 +135,11 @@ export function CorporateTaxFairValue({ basicInfo, financials, onBack, onNext }:
                 <Button type="button" variant="outline" onClick={onBack} size="lg">
                     戻る
                 </Button>
+                {onHome && (
+                    <Button type="button" variant="outline" onClick={onHome} size="lg">
+                        トップに戻る
+                    </Button>
+                )}
                 <Button type="button" onClick={onNext} size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
                     次へ進む
                 </Button>
