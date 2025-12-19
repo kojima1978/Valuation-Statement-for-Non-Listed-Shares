@@ -79,7 +79,7 @@ export function BasicInfoForm({ onNext, onBack, defaultValues }: BasicInfoFormPr
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">基本情報の入力 (Step 1/6)</h2>
+                <h2 className="text-2xl font-black text-primary">基本情報の入力 (Step 1/8)</h2>
                 <p className="text-muted-foreground">会社名や評価時期などの基本情報を入力します。</p>
             </div>
 

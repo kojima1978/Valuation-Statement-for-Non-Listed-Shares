@@ -34,7 +34,7 @@ export function ValuationResult({ basicInfo, financials, onBack, onNext }: Valua
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
             <div className="text-center space-y-2">
-                <h2 className="text-3xl font-black text-primary">相続税評価額 (Step 6/6)</h2>
+                <h2 className="text-3xl font-black text-primary">相続税評価額 (Step 6/8)</h2>
                 <p className="text-muted-foreground">最も有利（低価）となる評価方式を自動判定しました。</p>
             </div>
 

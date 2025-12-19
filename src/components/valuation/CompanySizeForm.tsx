@@ -132,7 +132,7 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">会社規模の判定 (Step 2/6)</h2>
+                <h2 className="text-2xl font-black text-primary">会社規模の判定 (Step 2/8)</h2>
                 <p className="text-muted-foreground">「資産・従業員」と「売上高」から会社規模とL割合を判定します。</p>
             </div>
 

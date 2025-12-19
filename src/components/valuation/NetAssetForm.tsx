@@ -19,6 +19,7 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
         // Convert Yen to Thousand Yen for display if values exist
         assetsBookValue: defaultValues?.assetsBookValue ? (defaultValues.assetsBookValue / 1000).toString() : "",
         assetsInheritanceValue: defaultValues?.assetsInheritanceValue ? (defaultValues.assetsInheritanceValue / 1000).toString() : "",
+        landFairValueAddition: defaultValues?.landFairValueAddition ? (defaultValues.landFairValueAddition / 1000).toString() : "",
         liabilitiesBookValue: defaultValues?.liabilitiesBookValue ? (defaultValues.liabilitiesBookValue / 1000).toString() : "",
         liabilitiesInheritanceValue: defaultValues?.liabilitiesInheritanceValue ? (defaultValues.liabilitiesInheritanceValue / 1000).toString() : "",
     });
@@ -34,12 +35,14 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
         // Convert Thousand Yen inputs back to Yen for storage
         const assetsBookValue = Number(formData.assetsBookValue) * 1000;
         const assetsInheritanceValue = formData.assetsInheritanceValue ? Number(formData.assetsInheritanceValue) * 1000 : undefined;
+        const landFairValueAddition = formData.landFairValueAddition ? Number(formData.landFairValueAddition) * 1000 : undefined;
         const liabilitiesBookValue = Number(formData.liabilitiesBookValue) * 1000;
         const liabilitiesInheritanceValue = formData.liabilitiesInheritanceValue ? Number(formData.liabilitiesInheritanceValue) * 1000 : undefined;
 
         onNext({
             assetsBookValue,
             assetsInheritanceValue,
+            landFairValueAddition,
             liabilitiesBookValue,
             liabilitiesInheritanceValue,
         });
@@ -56,7 +59,7 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">純資産価額の入力 (Step 5/6)</h2>
+                <h2 className="text-2xl font-black text-primary">純資産価額の入力 (Step 5/8)</h2>
                 <p className="text-muted-foreground">帳簿価額および相続税評価額を入力します。</p>
             </div>
 
@@ -95,6 +98,21 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
                                             name="assetsInheritanceValue"
                                             placeholder="0"
                                             value={formData.assetsInheritanceValue}
+                                            onChange={handleChange}
+                                            className="pr-12 text-right bg-white"
+                                        />
+                                        <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="landFairValueAddition" className="text-sm font-bold">土地の時価を加算（相続税評価額*0.25）</Label>
+                                    <div className="relative">
+                                        <NumberInput
+                                            id="landFairValueAddition"
+                                            name="landFairValueAddition"
+                                            placeholder="0"
+                                            value={formData.landFairValueAddition}
                                             onChange={handleChange}
                                             className="pr-12 text-right bg-white"
                                         />

@@ -132,19 +132,95 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
 
     const details = calculateValuationDetails();
 
-    // Extract month from taxationPeriod (format: "YYYY年MM月DD日")
+    // Extract month from taxationPeriod
+    // Format can be either "YYYY-MM-DD" (date input) or "令和X年Y月" (Japanese text)
     const getTaxationMonth = () => {
         if (!basicInfo.taxationPeriod) return "";
-        const match = basicInfo.taxationPeriod.match(/(\d+)月/);
-        return match ? match[1] : "";
+
+        // Try Japanese format first (e.g., "令和5年10月")
+        const japaneseMatch = basicInfo.taxationPeriod.match(/(\d+)月/);
+        if (japaneseMatch) return japaneseMatch[1];
+
+        // Try ISO date format (e.g., "2023-10-15")
+        const isoMatch = basicInfo.taxationPeriod.match(/^\d{4}-(\d{2})-\d{2}$/);
+        if (isoMatch) return String(parseInt(isoMatch[1], 10)); // Remove leading zero
+
+        return "";
+    };
+
+    // Extract year from taxationPeriod
+    const getTaxationYear = () => {
+        if (!basicInfo.taxationPeriod) return "";
+
+        // Try Japanese format first (e.g., "令和5年10月")
+        const japaneseMatch = basicInfo.taxationPeriod.match(/令和(\d+)年/);
+        if (japaneseMatch) return `令和${japaneseMatch[1]}年`;
+
+        // Try ISO date format (e.g., "2023-10-15")
+        const isoMatch = basicInfo.taxationPeriod.match(/^(\d{4})-\d{2}-\d{2}$/);
+        if (isoMatch) return `${isoMatch[1]}年`;
+
+        return "";
+    };
+
+    // Convert Western year to Japanese era (Reiwa)
+    const convertToReiwa = (year: number) => {
+        // 令和元年 = 2019
+        const reiwaYear = year - 2018;
+        if (reiwaYear < 1) {
+            // Before Reiwa era
+            return `${year}年`;
+        }
+        return `令和${reiwaYear}年`;
+    };
+
+    // Get previous year
+    const getPreviousYear = () => {
+        if (!basicInfo.taxationPeriod) return "";
+
+        // Try Japanese format first (e.g., "令和5年10月")
+        const japaneseMatch = basicInfo.taxationPeriod.match(/令和(\d+)年/);
+        if (japaneseMatch) {
+            const reiwaYear = parseInt(japaneseMatch[1], 10);
+            return `令和${reiwaYear - 1}年`;
+        }
+
+        // Try ISO date format (e.g., "2023-10-15")
+        const isoMatch = basicInfo.taxationPeriod.match(/^(\d{4})-\d{2}-\d{2}$/);
+        if (isoMatch) {
+            const year = parseInt(isoMatch[1], 10);
+            return convertToReiwa(year - 1);
+        }
+
+        return "";
+    };
+
+    // Calculate month for previous periods (1 month before, 2 months before)
+    const getMonthOffset = (offset: number) => {
+        const month = getTaxationMonth();
+        if (!month) return "";
+
+        const monthNum = parseInt(month, 10);
+        let targetMonth = monthNum - offset;
+
+        // Handle month wrapping (e.g., January - 1 month = December)
+        while (targetMonth <= 0) {
+            targetMonth += 12;
+        }
+
+        return String(targetMonth);
     };
 
     const taxationMonth = getTaxationMonth();
+    const oneMonthBefore = getMonthOffset(1);
+    const twoMonthsBefore = getMonthOffset(2);
+    const prevYear = getPreviousYear();
+    const prevYearMonth = taxationMonth; // 前年平均は同じ月
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">類似業種データの入力 (Step 4/6)</h2>
+                <h2 className="text-2xl font-black text-primary">類似業種データの入力 (Step 4/8)</h2>
                 <p className="text-muted-foreground">国税庁公表の類似業種比準価額算定上の数値を入力します。</p>
             </div>
 
@@ -170,6 +246,22 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                 </div>
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div>
+                                        <Label htmlFor="industryStockPricePrevYearAverage" className="text-xs text-muted-foreground">
+                                            {prevYear ? `前年平均（${prevYear}）` : "前年平均"}
+                                        </Label>
+                                        <div className="relative">
+                                            <NumberInput
+                                                id="industryStockPricePrevYearAverage"
+                                                name="industryStockPricePrevYearAverage"
+                                                placeholder="0"
+                                                value={formData.industryStockPricePrevYearAverage}
+                                                onChange={handleChange}
+                                                className="pr-8 text-right bg-white"
+                                            />
+                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                                        </div>
+                                    </div>
+                                    <div>
                                         <Label htmlFor="industryStockPriceCurrent" className="text-xs text-muted-foreground">
                                             {taxationMonth ? `課税時期の月（${taxationMonth}月）` : "課税時期の月"}
                                         </Label>
@@ -186,7 +278,9 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                         </div>
                                     </div>
                                     <div>
-                                        <Label htmlFor="industryStockPrice1MonthBefore" className="text-xs text-muted-foreground">前月</Label>
+                                        <Label htmlFor="industryStockPrice1MonthBefore" className="text-xs text-muted-foreground">
+                                            {oneMonthBefore ? `前月（${oneMonthBefore}月）` : "前月"}
+                                        </Label>
                                         <div className="relative">
                                             <NumberInput
                                                 id="industryStockPrice1MonthBefore"
@@ -200,27 +294,15 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                                         </div>
                                     </div>
                                     <div>
-                                        <Label htmlFor="industryStockPrice2MonthsBefore" className="text-xs text-muted-foreground">前々月</Label>
+                                        <Label htmlFor="industryStockPrice2MonthsBefore" className="text-xs text-muted-foreground">
+                                            {twoMonthsBefore ? `前々月（${twoMonthsBefore}月）` : "前々月"}
+                                        </Label>
                                         <div className="relative">
                                             <NumberInput
                                                 id="industryStockPrice2MonthsBefore"
                                                 name="industryStockPrice2MonthsBefore"
                                                 placeholder="0"
                                                 value={formData.industryStockPrice2MonthsBefore}
-                                                onChange={handleChange}
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <Label htmlFor="industryStockPricePrevYearAverage" className="text-xs text-muted-foreground">前年平均</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                id="industryStockPricePrevYearAverage"
-                                                name="industryStockPricePrevYearAverage"
-                                                placeholder="0"
-                                                value={formData.industryStockPricePrevYearAverage}
                                                 onChange={handleChange}
                                                 className="pr-8 text-right bg-white"
                                             />

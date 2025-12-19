@@ -20,6 +20,7 @@ export interface Financials {
     // Net Asset Data
     assetsBookValue: number;
     assetsInheritanceValue?: number; // 相続税評価額
+    landFairValueAddition?: number; // 土地の時価を加算（相続税評価額*0.25）
     liabilitiesBookValue: number;
     liabilitiesInheritanceValue?: number; // 相続税評価額
 

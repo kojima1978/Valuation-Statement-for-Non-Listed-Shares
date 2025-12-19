@@ -64,6 +64,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     // Step 5: 純資産データ（千円）
     assetsBookValue: "",
     assetsInheritanceValue: "",
+    landFairValueAddition: "",
     liabilitiesBookValue: "",
     liabilitiesInheritanceValue: "",
   });
@@ -118,6 +119,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
         // Step 5: 純資産データ（千円）
         assetsBookValue: defaultFinancials?.assetsBookValue ? (defaultFinancials.assetsBookValue / 1000).toString() : "",
         assetsInheritanceValue: defaultFinancials?.assetsInheritanceValue ? (defaultFinancials.assetsInheritanceValue / 1000).toString() : "",
+        landFairValueAddition: defaultFinancials?.landFairValueAddition ? (defaultFinancials.landFairValueAddition / 1000).toString() : "",
         liabilitiesBookValue: defaultFinancials?.liabilitiesBookValue ? (defaultFinancials.liabilitiesBookValue / 1000).toString() : "",
         liabilitiesInheritanceValue: defaultFinancials?.liabilitiesInheritanceValue ? (defaultFinancials.liabilitiesInheritanceValue / 1000).toString() : "",
       });
@@ -179,6 +181,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
       industryBookValue: pattern.industryBookValue.toString(),
       assetsBookValue: pattern.assetsBookValue.toString(),
       assetsInheritanceValue: pattern.assetsInheritanceValue.toString(),
+      landFairValueAddition: "0",
       liabilitiesBookValue: pattern.liabilitiesBookValue.toString(),
       liabilitiesInheritanceValue: pattern.liabilitiesInheritanceValue.toString(),
     });
@@ -336,6 +339,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     // Step 5: 純資産データ（千円を円に変換）
     const assetsBookValue = Number(formData.assetsBookValue) * 1000;
     const assetsInheritanceValue = formData.assetsInheritanceValue ? Number(formData.assetsInheritanceValue) * 1000 : undefined;
+    const landFairValueAddition = formData.landFairValueAddition ? Number(formData.landFairValueAddition) * 1000 : undefined;
     const liabilitiesBookValue = Number(formData.liabilitiesBookValue) * 1000;
     const liabilitiesInheritanceValue = formData.liabilitiesInheritanceValue ? Number(formData.liabilitiesInheritanceValue) * 1000 : undefined;
 
@@ -385,6 +389,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
       // 純資産データ
       assetsBookValue,
       assetsInheritanceValue,
+      landFairValueAddition,
       liabilitiesBookValue,
       liabilitiesInheritanceValue,
     };
@@ -1109,6 +1114,20 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     id="assetsInheritanceValue"
                     name="assetsInheritanceValue"
                     value={formData.assetsInheritanceValue}
+                    onChange={handleChange}
+                    placeholder="0"
+                    className="pr-12 text-right"
+                  />
+                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="landFairValueAddition" className="text-sm font-bold">土地の時価を加算（相続税評価額*0.25）</Label>
+                <div className="relative">
+                  <NumberInput
+                    id="landFairValueAddition"
+                    name="landFairValueAddition"
+                    value={formData.landFairValueAddition}
                     onChange={handleChange}
                     placeholder="0"
                     className="pr-12 text-right"

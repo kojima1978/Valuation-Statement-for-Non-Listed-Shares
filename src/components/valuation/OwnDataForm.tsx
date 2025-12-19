@@ -223,7 +223,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">自社の実績データ入力 (Step 3/6)</h2>
+                <h2 className="text-2xl font-black text-primary">自社の実績データ入力 (Step 3/8)</h2>
                 <p className="text-muted-foreground">自社の配当と、利益、純資産を入力してください。</p>
             </div>
 

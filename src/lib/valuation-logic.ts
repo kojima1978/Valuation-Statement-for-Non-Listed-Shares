@@ -195,7 +195,9 @@ export function calculateDetailedSimilarIndustryMethod(
     const conversionRatio = issuedShares > 0 ? shareCount50 / issuedShares : 1;
 
     // Final Comparable Value
-    const value = Math.floor(S_50_Raw * conversionRatio);
+    // 円未満を切り捨ててから原株換算を掛ける
+    const S_50_Floored = Math.floor(S_50_Raw);
+    const value = S_50_Floored * conversionRatio;
 
     return {
         value,
@@ -458,11 +460,13 @@ export function calculateCorporateTaxFairValue(basicInfo: BasicInfo, financials:
     const { assetsBookValue, liabilitiesBookValue } = financials;
     const assetsInheritanceValue = financials.assetsInheritanceValue ?? assetsBookValue;
     const liabilitiesInheritanceValue = financials.liabilitiesInheritanceValue ?? liabilitiesBookValue;
+    const landFairValueAddition = financials.landFairValueAddition ?? 0;
 
     let { issuedShares, sizeMultiplier } = basicInfo;
 
     // 1. Net Asset Value per Share (N) - 法人税法上の時価では税金調整なし
-    const netInh = assetsInheritanceValue - liabilitiesInheritanceValue;
+    // 土地の時価を加算（相続税評価額*0.25）を追加
+    const netInh = assetsInheritanceValue + landFairValueAddition - liabilitiesInheritanceValue;
     const netAssetPerShare = Math.max(0, netInh / issuedShares);
 
     // 2. Comparable Company Value (S)
