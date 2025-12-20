@@ -132,7 +132,7 @@ export function ValuationSummary({ basicInfo, financials, onBack, onHome }: Valu
                                         <div className="text-xs text-muted-foreground">円</div>
                                     </td>
                                 </tr>
-                                <tr className="bg-white">
+                                <tr className="bg-white border-b border-slate-200">
                                     <td className="py-4 px-4 font-semibold">純資産価額</td>
                                     <td className="text-center py-4 px-4">
                                         <div className="text-lg font-semibold">{results.step6.netAssetPerShare.toLocaleString()}</div>
@@ -145,6 +145,18 @@ export function ValuationSummary({ basicInfo, financials, onBack, onHome }: Valu
                                     <td className="text-center py-4 px-4">
                                         <div className="text-lg font-semibold">{results.step8.netAssetPerShare.toLocaleString()}</div>
                                         <div className="text-xs text-muted-foreground">円</div>
+                                    </td>
+                                </tr>
+                                <tr className="bg-blue-50">
+                                    <td className="py-4 px-4 font-semibold">Lの割合</td>
+                                    <td className="text-center py-4 px-4">
+                                        <div className="text-lg font-semibold">{results.step6.lRatio}</div>
+                                    </td>
+                                    <td className="text-center py-4 px-4">
+                                        <div className="text-lg font-semibold">{results.step7.lRatio}</div>
+                                    </td>
+                                    <td className="text-center py-4 px-4">
+                                        <div className="text-lg font-semibold">{results.step8.lRatio}</div>
                                     </td>
                                 </tr>
                             </tbody>

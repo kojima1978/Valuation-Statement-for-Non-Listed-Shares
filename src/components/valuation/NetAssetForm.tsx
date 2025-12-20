@@ -29,9 +29,8 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    // 共通のデータ準備関数
+    const prepareFormData = () => {
         // Convert Thousand Yen inputs back to Yen for storage
         const assetsBookValue = Number(formData.assetsBookValue) * 1000;
         const assetsInheritanceValue = formData.assetsInheritanceValue ? Number(formData.assetsInheritanceValue) * 1000 : undefined;
@@ -39,13 +38,25 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
         const liabilitiesBookValue = Number(formData.liabilitiesBookValue) * 1000;
         const liabilitiesInheritanceValue = formData.liabilitiesInheritanceValue ? Number(formData.liabilitiesInheritanceValue) * 1000 : undefined;
 
-        onNext({
+        return {
             assetsBookValue,
             assetsInheritanceValue,
             landFairValueAddition,
             liabilitiesBookValue,
             liabilitiesInheritanceValue,
-        });
+        };
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext(prepareFormData());
+    };
+
+    const handleBack = () => {
+        // Save data before going back
+        onNext(prepareFormData());
+        // Navigate back
+        onBack();
     };
 
     const handleCopyInheritanceToBook = () => {
@@ -354,7 +365,7 @@ export function NetAssetForm({ basicInfo, onBack, onNext, defaultValues }: NetAs
                     </div>
 
                     <div className="flex gap-4 pt-4">
-                        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onBack}>
+                        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={handleBack}>
                             戻る
                         </Button>
                         <Button type="submit" size="lg" className="flex-[2] shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">

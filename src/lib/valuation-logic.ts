@@ -308,11 +308,16 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
     const assetsInheritanceValue = financials.assetsInheritanceValue ?? assetsBookValue;
     const liabilitiesInheritanceValue = financials.liabilitiesInheritanceValue ?? liabilitiesBookValue;
 
-    let { issuedShares, lRatio, size, sizeMultiplier } = basicInfo;
+    let { issuedShares, size, sizeMultiplier } = basicInfo;
+    let lRatio = basicInfo.lRatio;
 
     // 比準要素数0の会社の場合、L=0として扱う（純資産価額のみで評価）
     if (financials.isZeroElementCompany) {
         lRatio = 0.00;
+    }
+    // 小会社の場合、L=0.5として扱う
+    else if (size === "Small") {
+        lRatio = 0.50;
     }
 
     // 1. Net Asset Value per Share (N)
@@ -374,6 +379,7 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
     if (financials.isZeroElementCompany) {
         finalValue = N;
         methodDescription = "比準要素数0の会社 (純資産価額)";
+        lRatio = 0.00;
         comparisonDetails = [
             { name: "比準要素数0", value: Math.floor(N) }
         ];
@@ -383,6 +389,7 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
         const blended = (S * 0.25) + (N * 0.75);
         finalValue = Math.min(blended, N);
         methodDescription = "比準要素数1の会社 ((S×0.25 + N×0.75)とNのいずれか低い方)";
+        lRatio = 0.25;
         comparisonDetails = [
             { name: "比準要素数1", value: Math.floor(finalValue) }
         ];
@@ -396,6 +403,7 @@ export function calculateFinalValuation(basicInfo: BasicInfo, financials: Financ
             finalValue = N;
             methodDescription = "純資産価額 (選択)";
         }
+        lRatio = 1.00;
         comparisonDetails = [
             { name: "大会社", value: Math.floor(S) }
         ];
@@ -511,10 +519,15 @@ export function calculateCorporateTaxFairValue(basicInfo: BasicInfo, financials:
 
     let comparisonDetails: { name: string; value: number }[] = [];
 
+    // 法人税法上の時価のLの割合とサイズを決定
+    let lRatio: 0.00 | 0.25 | 0.50 = 0.50;
+    let size: CompanySize = "Small";
+
     // 比準要素数0の会社の場合（純資産価額のみ）
     if (financials.isZeroElementCompany) {
         finalValue = N;
         methodDescription = "比準要素数0の会社 (純資産価額)";
+        lRatio = 0.00;
         comparisonDetails = [
             { name: "比準要素数0", value: Math.floor(N) }
         ];
@@ -524,6 +537,7 @@ export function calculateCorporateTaxFairValue(basicInfo: BasicInfo, financials:
         const blended = (S * 0.25) + (N * 0.75);
         finalValue = Math.min(blended, N);
         methodDescription = "比準要素数1の会社 ((S×0.25 + N×0.75)とNのいずれか低い方)";
+        lRatio = 0.25;
         comparisonDetails = [
             { name: "比準要素数1", value: Math.floor(finalValue) }
         ];
@@ -533,6 +547,7 @@ export function calculateCorporateTaxFairValue(basicInfo: BasicInfo, financials:
         const blended = (S * 0.50) + (N * 0.50);
         finalValue = Math.min(N, blended);
         methodDescription = "法人税法上の時価（小会社の株式の価額）";
+        lRatio = 0.50;
         comparisonDetails = [
             { name: "小会社の株式の価額", value: Math.floor(finalValue) }
         ];
@@ -543,6 +558,8 @@ export function calculateCorporateTaxFairValue(basicInfo: BasicInfo, financials:
         netAssetPerShare: Math.floor(N),
         comparableValue: Math.floor(S),
         methodDescription,
+        size,
+        lRatio,
         comparisonDetails,
         netAssetDetail: {
             netInh, // 相続税評価額ベースの純資産（税金調整なし）

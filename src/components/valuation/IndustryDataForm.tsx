@@ -45,9 +45,8 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    // 共通のデータ準備関数
+    const prepareFormData = () => {
         // Parse Inputs
         const industryStockPriceCurrent = Number(formData.industryStockPriceCurrent);
         const industryStockPrice1MonthBefore = Number(formData.industryStockPrice1MonthBefore);
@@ -63,7 +62,7 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
         const industryProfit = Number(formData.industryProfit);
         const industryBookValue = Number(formData.industryBookValue);
 
-        onNext({
+        return {
             industryStockPriceCurrent,
             industryStockPrice1MonthBefore,
             industryStockPrice2MonthsBefore,
@@ -71,7 +70,19 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
             industryDividends,
             industryProfit,
             industryBookValue,
-        });
+        };
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext(prepareFormData());
+    };
+
+    const handleBack = () => {
+        // Save data before going back
+        onNext(prepareFormData());
+        // Navigate back
+        onBack();
     };
 
     // Helper to calculate Min Stock Price for display (A)
@@ -514,7 +525,7 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                     {/* ... */}
 
                     <div className="flex gap-4 pt-4">
-                        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={onBack}>
+                        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={handleBack}>
                             戻る
                         </Button>
                         <Button type="submit" size="lg" className="flex-[2] shadow-lg hover:shadow-xl transition-all hover:-translate-y-1">
