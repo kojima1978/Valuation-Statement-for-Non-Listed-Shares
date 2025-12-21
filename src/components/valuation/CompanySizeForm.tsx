@@ -136,6 +136,32 @@ export function CompanySizeForm({ onNext, onBack, defaultValues, onChange }: Com
                 <p className="text-muted-foreground">「資産・従業員」と「売上高」から会社規模とL割合を判定します。</p>
             </div>
 
+            <div className="text-center space-y-2">
+                <a
+                    href="https://www.e-stat.go.jp/classifications/terms/10"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                >
+                    日本標準産業分類(令和５年[2023年]７月改定)
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </a>
+                <div className="text-sm text-muted-foreground">|</div>
+                <a
+                    href="https://www.nta.go.jp/law/joho-zeikaishaku/hyoka/250600/pdf/02.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                >
+                    （別表）日本標準産業分類の分類項目と類似業種比準価額計算上の業種目との対比表（令和７年分）
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </a>
+            </div>
+
             <Card className="p-6 border-secondary/20 shadow-lg">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">

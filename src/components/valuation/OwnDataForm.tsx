@@ -32,16 +32,19 @@ interface CalculationResult {
     profitC2Val: number;
     p1Val: number;
     p2Val: number;
+    p3Val: number;
 }
 
 export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDataFormProps) {
+    const isMedicalCorporation = basicInfo.industryType === "MedicalCorporation";
+
     const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC || "auto");
     const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC1 || "auto");
     const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(defaultValues?.profitMethodC2 || "auto");
     const [formData, setFormData] = useState({
-        ownDividendPrev: defaultValues?.ownDividendPrev?.toString() || "",
-        ownDividend2Prev: defaultValues?.ownDividend2Prev?.toString() || "",
-        ownDividend3Prev: defaultValues?.ownDividend3Prev?.toString() || "",
+        ownDividendPrev: isMedicalCorporation ? "0" : (defaultValues?.ownDividendPrev?.toString() || ""),
+        ownDividend2Prev: isMedicalCorporation ? "0" : (defaultValues?.ownDividend2Prev?.toString() || ""),
+        ownDividend3Prev: isMedicalCorporation ? "0" : (defaultValues?.ownDividend3Prev?.toString() || ""),
         ownTaxableIncomePrev: defaultValues?.ownTaxableIncomePrev?.toString() || "",
         ownCarryForwardLossPrev: defaultValues?.ownCarryForwardLossPrev?.toString() || "",
         ownTaxableIncome2Prev: defaultValues?.ownTaxableIncome2Prev?.toString() || "",
@@ -72,6 +75,8 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
         const l1 = Number(formData.ownCarryForwardLossPrev);
         const p2 = Number(formData.ownTaxableIncome2Prev);
         const l2 = Number(formData.ownCarryForwardLoss2Prev);
+        const p3 = Number(formData.ownTaxableIncome3Prev);
+        const l3 = Number(formData.ownCarryForwardLoss3Prev);
         const cap1 = Number(formData.ownCapitalPrev);
         const re1 = Number(formData.ownRetainedEarningsPrev);
         const cap2 = Number(formData.ownCapital2Prev);
@@ -87,11 +92,18 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
         // 利益計算
         const profitPrevAmount = (p1 + l1) * 1000;
         const profit2PrevAmount = (p2 + l2) * 1000;
+        const profit3PrevAmount = (p3 + l3) * 1000;
         const profitPerSharePrev = profitPrevAmount / shareCount50;
         const profitPerShareAvg = ((profitPrevAmount + profit2PrevAmount) / 2) / shareCount50;
 
+        // c2用の計算: 2期前と(2期前+3期前)/2
+        const profitPerShare2Prev = profit2PrevAmount / shareCount50;
+        const profitPerShareAvg2And3 = ((profit2PrevAmount + profit3PrevAmount) / 2) / shareCount50;
+
         const profitC1Val = Math.floor(Math.max(0, profitPerSharePrev));
         const profitC2Val = Math.floor(Math.max(0, profitPerShareAvg));
+        const profitC2_2PrevVal = Math.floor(Math.max(0, profitPerShare2Prev));
+        const profitC2_AvgVal = Math.floor(Math.max(0, profitPerShareAvg2And3));
 
         let ownProfit: number;
         if (profitMethodC === "c1") {
@@ -108,16 +120,20 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
         } else if (profitMethodC1 === "c2") {
             ownProfitC1 = profitC2Val;
         } else {
-            ownProfitC1 = profitC2Val;
+            // 自動: 直前期と2年平均の高いほう
+            ownProfitC1 = Math.max(profitC1Val, profitC2Val);
         }
 
         let ownProfitC2: number;
         if (profitMethodC2 === "c1") {
-            ownProfitC2 = profitC1Val;
+            // c1を選択: 2期前
+            ownProfitC2 = profitC2_2PrevVal;
         } else if (profitMethodC2 === "c2") {
-            ownProfitC2 = profitC2Val;
+            // c2を選択: 2期前と3期前の平均
+            ownProfitC2 = profitC2_AvgVal;
         } else {
-            ownProfitC2 = profitC2Val;
+            // 自動: 2期前と(2期前+3期前)/2の高いほう
+            ownProfitC2 = Math.max(profitC2_2PrevVal, profitC2_AvgVal);
         }
 
         // 純資産計算
@@ -150,15 +166,15 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
             profitC2Val,
             p1Val: profitPrevAmount,
             p2Val: profit2PrevAmount,
+            p3Val: profit3PrevAmount,
         };
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    // 共通のデータ準備関数
+    const prepareFormData = () => {
         const calculated = calculateValues();
 
-        onNext({
+        return {
             ownDividends: calculated.ownDividends,
             ownProfit: calculated.ownProfit,
             ownBookValue: calculated.ownBookValue,
@@ -186,7 +202,12 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
             ownRetainedEarningsPrev: Number(formData.ownRetainedEarningsPrev),
             ownCapital2Prev: Number(formData.ownCapital2Prev),
             ownRetainedEarnings2Prev: Number(formData.ownRetainedEarnings2Prev),
-        });
+        };
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onNext(prepareFormData());
     };
 
     const handleCopyFromPrev = () => {
@@ -209,131 +230,114 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
     };
 
     const handleBack = () => {
-        const calculated = calculateValues();
-
-        // 現在のデータをonNextと同じ形式で保存
-        onNext({
-            ownDividends: calculated.ownDividends,
-            ownProfit: calculated.ownProfit,
-            ownBookValue: calculated.ownBookValue,
-            ownDividendsB1: calculated.ownDividendsB1,
-            ownDividendsB2: calculated.ownDividendsB2,
-            ownProfitC1: calculated.ownProfitC1,
-            ownProfitC2: calculated.ownProfitC2,
-            ownBookValueD1: calculated.ownBookValueD1,
-            ownBookValueD2: calculated.ownBookValueD2,
-            isZeroElementCompany: calculated.isZeroElementCompany,
-            isOneElementCompany: calculated.isOneElementCompany,
-            profitMethodC,
-            profitMethodC1,
-            profitMethodC2,
-            ownDividendPrev: Number(formData.ownDividendPrev),
-            ownDividend2Prev: Number(formData.ownDividend2Prev),
-            ownDividend3Prev: Number(formData.ownDividend3Prev),
-            ownTaxableIncomePrev: Number(formData.ownTaxableIncomePrev),
-            ownCarryForwardLossPrev: Number(formData.ownCarryForwardLossPrev),
-            ownTaxableIncome2Prev: Number(formData.ownTaxableIncome2Prev),
-            ownCarryForwardLoss2Prev: Number(formData.ownCarryForwardLoss2Prev),
-            ownTaxableIncome3Prev: Number(formData.ownTaxableIncome3Prev),
-            ownCarryForwardLoss3Prev: Number(formData.ownCarryForwardLoss3Prev),
-            ownCapitalPrev: Number(formData.ownCapitalPrev),
-            ownRetainedEarningsPrev: Number(formData.ownRetainedEarningsPrev),
-            ownCapital2Prev: Number(formData.ownCapital2Prev),
-            ownRetainedEarnings2Prev: Number(formData.ownRetainedEarnings2Prev),
-        });
-
-        // その後、戻る処理を実行
+        // Save data before going back
+        onNext(prepareFormData());
+        // Navigate back
         onBack();
     };
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="text-center space-y-2">
-                <h2 className="text-2xl font-black text-primary">自社の実績データ入力 (Step 3/6)</h2>
+                <h2 className="text-2xl font-black text-primary">自社の実績データ入力 (Step 3/8)</h2>
                 <p className="text-muted-foreground">自社の配当と、利益、純資産を入力してください。</p>
             </div>
 
             <Card className="p-6 border-secondary/20 shadow-lg">
                 <form onSubmit={handleSubmit} className="space-y-8">
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-2 border-b border-dashed">
-                            <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center font-bold">3</div>
-                                <h3 className="text-lg font-bold">自社のデータ</h3>
+                        <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 space-y-4">
+                            <div className="flex items-center justify-between pb-2 border-b border-blue-300">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">✎</div>
+                                    <h3 className="text-lg font-bold text-blue-900">入力：自社のデータ</h3>
+                                </div>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleCopyFromPrev}
+                                    className="text-xs"
+                                >
+                                    直前期データを複写
+                                </Button>
                             </div>
-                            <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                onClick={handleCopyFromPrev}
-                                className="text-xs"
-                            >
-                                直前期データを複写
-                            </Button>
-                        </div>
 
 
                         {/* Dividends */}
-                        <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
-                            <Label>配当金額 (b)</Label>
-                            <div className="grid grid-cols-3 gap-2">
-                                <div className="space-y-1">
-                                    <Label className="text-xs">直前期</Label>
+                        <div className="space-y-2 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
+                            <div className="flex items-center justify-between">
+                                <Label>配当金額 (b)</Label>
+                                {isMedicalCorporation && (
+                                    <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                        医療法人は配当不可
+                                    </span>
+                                )}
+                            </div>
+                            <div className="space-y-3">
+                                <div className="space-y-2">
+                                    <Label htmlFor="ownDividendPrev" className="text-xs">直前期</Label>
                                     <div className="relative">
                                         <NumberInput
+                                            id="ownDividendPrev"
                                             name="ownDividendPrev"
                                             placeholder="0"
                                             onChange={handleChange}
                                             value={formData.ownDividendPrev}
                                             required
-                                            className="pr-8 text-right bg-white"
+                                            disabled={isMedicalCorporation}
+                                            className={`pr-12 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                         />
-                                        <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
                                     </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">2期前</Label>
+                                <div className="space-y-2">
+                                    <Label htmlFor="ownDividend2Prev" className="text-xs">2期前</Label>
                                     <div className="relative">
                                         <NumberInput
+                                            id="ownDividend2Prev"
                                             name="ownDividend2Prev"
                                             placeholder="0"
                                             onChange={handleChange}
                                             value={formData.ownDividend2Prev}
                                             required
-                                            className="pr-8 text-right bg-white"
+                                            disabled={isMedicalCorporation}
+                                            className={`pr-12 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                         />
-                                        <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
                                     </div>
                                 </div>
-                                <div className="space-y-1">
-                                    <Label className="text-xs">3期前</Label>
+                                <div className="space-y-2">
+                                    <Label htmlFor="ownDividend3Prev" className="text-xs">3期前</Label>
                                     <div className="relative">
                                         <NumberInput
+                                            id="ownDividend3Prev"
                                             name="ownDividend3Prev"
                                             placeholder="0"
                                             onChange={handleChange}
                                             value={formData.ownDividend3Prev}
                                             required
-                                            className="pr-8 text-right bg-white"
+                                            disabled={isMedicalCorporation}
+                                            className={`pr-12 text-right ${isMedicalCorporation ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
                                         />
-                                        <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Profit */}
-                        <div className="space-y-3 bg-primary/5 p-4 rounded-lg">
+                        <div className="space-y-3 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
                             <Label>利益金額 (c)</Label>
 
                             {/* Selection for c */}
                             <div className="flex items-center gap-2 text-xs">
-                                <span className="text-muted-foreground min-w-[60px]">c の選択:</span>
-                                <div className="flex gap-2">
+                                <span className="text-muted-foreground w-[80px]">c の選択:</span>
+                                <div className="flex gap-2 flex-1">
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC("auto")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC === "auto"
                                                 ? "bg-primary text-white"
                                                 : "bg-white text-muted-foreground hover:bg-primary/10"
@@ -344,7 +348,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC("c1")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC === "c1"
                                                 ? "bg-primary text-white"
                                                 : "bg-white text-muted-foreground hover:bg-primary/10"
@@ -355,7 +359,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC("c2")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC === "c2"
                                                 ? "bg-primary text-white"
                                                 : "bg-white text-muted-foreground hover:bg-primary/10"
@@ -364,16 +368,19 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                         2年平均
                                     </button>
                                 </div>
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                    (自動: 低いほう)
+                                </span>
                             </div>
 
                             {/* Selection for c1 */}
                             <div className="flex items-center gap-2 text-xs">
-                                <span className="text-muted-foreground min-w-[60px]">c1 の選択:</span>
-                                <div className="flex gap-2">
+                                <span className="text-muted-foreground w-[80px]">c1 の選択:</span>
+                                <div className="flex gap-2 flex-1">
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC1("auto")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC1 === "auto"
                                                 ? "bg-green-600 text-white"
                                                 : "bg-white text-muted-foreground hover:bg-green-100"
@@ -384,7 +391,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC1("c1")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC1 === "c1"
                                                 ? "bg-green-600 text-white"
                                                 : "bg-white text-muted-foreground hover:bg-green-100"
@@ -395,7 +402,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC1("c2")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC1 === "c2"
                                                 ? "bg-green-600 text-white"
                                                 : "bg-white text-muted-foreground hover:bg-green-100"
@@ -404,16 +411,19 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                         2年平均
                                     </button>
                                 </div>
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                    (自動: 高いほう)
+                                </span>
                             </div>
 
                             {/* Selection for c2 */}
                             <div className="flex items-center gap-2 text-xs">
-                                <span className="text-muted-foreground min-w-[60px]">c2 の選択:</span>
-                                <div className="flex gap-2">
+                                <span className="text-muted-foreground w-[80px]">c2 の選択:</span>
+                                <div className="flex gap-2 flex-1">
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC2("auto")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC2 === "auto"
                                                 ? "bg-green-600 text-white"
                                                 : "bg-white text-muted-foreground hover:bg-green-100"
@@ -424,18 +434,18 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC2("c1")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC2 === "c1"
                                                 ? "bg-green-600 text-white"
                                                 : "bg-white text-muted-foreground hover:bg-green-100"
                                         }`}
                                     >
-                                        直前
+                                        2期前
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setProfitMethodC2("c2")}
-                                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                                        className={`px-3 py-1 text-xs rounded transition-colors min-w-[60px] ${
                                             profitMethodC2 === "c2"
                                                 ? "bg-green-600 text-white"
                                                 : "bg-white text-muted-foreground hover:bg-green-100"
@@ -444,104 +454,114 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                         2年平均
                                     </button>
                                 </div>
+                                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                                    (自動: 高いほう)
+                                </span>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4">
-                                {/* Last Year */}
+                            <div className="space-y-3">
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-center block">直前期</Label>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">利益</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownTaxableIncomePrev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownTaxableIncomePrev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                    <Label className="text-xs font-bold">直前期</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownTaxableIncomePrev" className="text-[10px] text-muted-foreground">利益</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownTaxableIncomePrev"
+                                                    name="ownTaxableIncomePrev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownTaxableIncomePrev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownCarryForwardLossPrev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownCarryForwardLossPrev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownCarryForwardLossPrev" className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownCarryForwardLossPrev"
+                                                    name="ownCarryForwardLossPrev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownCarryForwardLossPrev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* 2 Years Ago */}
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-center block">2期前</Label>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">利益</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownTaxableIncome2Prev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownTaxableIncome2Prev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                    <Label className="text-xs font-bold">2期前</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownTaxableIncome2Prev" className="text-[10px] text-muted-foreground">利益</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownTaxableIncome2Prev"
+                                                    name="ownTaxableIncome2Prev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownTaxableIncome2Prev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownCarryForwardLoss2Prev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownCarryForwardLoss2Prev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownCarryForwardLoss2Prev" className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownCarryForwardLoss2Prev"
+                                                    name="ownCarryForwardLoss2Prev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownCarryForwardLoss2Prev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* 3 Years Ago */}
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-center block">3期前</Label>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">利益</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownTaxableIncome3Prev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownTaxableIncome3Prev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                    <Label className="text-xs font-bold">3期前</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownTaxableIncome3Prev" className="text-[10px] text-muted-foreground">利益</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownTaxableIncome3Prev"
+                                                    name="ownTaxableIncome3Prev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownTaxableIncome3Prev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownCarryForwardLoss3Prev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownCarryForwardLoss3Prev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownCarryForwardLoss3Prev" className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownCarryForwardLoss3Prev"
+                                                    name="ownCarryForwardLoss3Prev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownCarryForwardLoss3Prev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -549,86 +569,94 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                         </div>
 
                         {/* Book Value */}
-                        <div className="space-y-2 bg-primary/5 p-4 rounded-lg">
+                        <div className="space-y-2 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
                             <Label>純資産価額 (d)</Label>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Last Year */}
+                            <div className="space-y-3">
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-center block">直前期</Label>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">資本金</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownCapitalPrev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownCapitalPrev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                    <Label className="text-xs font-bold">直前期</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownCapitalPrev" className="text-[10px] text-muted-foreground">資本金</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownCapitalPrev"
+                                                    name="ownCapitalPrev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownCapitalPrev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越利益剰余金</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownRetainedEarningsPrev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownRetainedEarningsPrev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownRetainedEarningsPrev" className="text-[10px] text-muted-foreground">繰越利益剰余金</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownRetainedEarningsPrev"
+                                                    name="ownRetainedEarningsPrev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownRetainedEarningsPrev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                {/* 2 Years Ago */}
                                 <div className="space-y-2">
-                                    <Label className="text-xs font-bold text-center block">2期前</Label>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">資本金</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownCapital2Prev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownCapital2Prev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                    <Label className="text-xs font-bold">2期前</Label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownCapital2Prev" className="text-[10px] text-muted-foreground">資本金</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownCapital2Prev"
+                                                    name="ownCapital2Prev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownCapital2Prev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <Label className="text-[10px] text-muted-foreground">繰越利益剰余金</Label>
-                                        <div className="relative">
-                                            <NumberInput
-                                                name="ownRetainedEarnings2Prev"
-                                                placeholder="0"
-                                                onChange={handleChange}
-                                                value={formData.ownRetainedEarnings2Prev}
-                                                required
-                                                className="pr-8 text-right bg-white"
-                                            />
-                                            <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">千円</span>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="ownRetainedEarnings2Prev" className="text-[10px] text-muted-foreground">繰越利益剰余金</Label>
+                                            <div className="relative">
+                                                <NumberInput
+                                                    id="ownRetainedEarnings2Prev"
+                                                    name="ownRetainedEarnings2Prev"
+                                                    placeholder="0"
+                                                    onChange={handleChange}
+                                                    value={formData.ownRetainedEarnings2Prev}
+                                                    required
+                                                    className="pr-12 text-right bg-white"
+                                                />
+                                                <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
+                        </div>
 
                         {/* Real-time Preview */}
-                        <div className="space-y-3 bg-white/50 p-4 rounded-lg border border-primary/10 text-sm">
-                            <h4 className="font-bold text-muted-foreground border-b border-primary/10 pb-1 mb-2">リアルタイムプレビュー (1株50円換算)</h4>
-
+                        <div className="bg-green-50 p-4 rounded-lg border-2 border-green-300 space-y-4">
+                            <div className="flex items-center gap-2 pb-2 border-b border-green-300">
+                                <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center font-bold">📊</div>
+                                <h3 className="text-lg font-bold text-green-900">計算結果：リアルタイムプレビュー (1株50円換算)</h3>
+                            </div>
+                        <div className="space-y-3 bg-white p-4 rounded-lg text-sm">
                             {(() => {
                                 const calculated = calculateValues();
-                                const { shareCount50, p1Val, p2Val } = calculated;
+                                const { shareCount50, p1Val, p2Val, p3Val } = calculated;
                                 const b = calculated.ownDividends;
                                 const b1 = calculated.ownDividendsB1;
                                 const b2 = calculated.ownDividendsB2;
@@ -641,7 +669,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
 
                                 const cMethod = profitMethodC === "c1" ? "直前" : profitMethodC === "c2" ? "2年平均" : "自動";
                                 const c1Method = profitMethodC1 === "c1" ? "直前" : profitMethodC1 === "c2" ? "2年平均" : "自動";
-                                const c2Method = profitMethodC2 === "c1" ? "直前" : profitMethodC2 === "c2" ? "2年平均" : "自動";
+                                const c2Method = profitMethodC2 === "c1" ? "2期前" : profitMethodC2 === "c2" ? "2年平均" : "自動";
 
                                 return (
                                     <div className="space-y-4">
@@ -719,7 +747,7 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                                                 <div className="flex justify-between items-center bg-green-50/50 p-2 rounded text-xs">
                                                     <span className="text-black whitespace-nowrap">（1株当たりの利益金額）c2:</span>
                                                     <div className="text-[9px] text-muted-foreground px-2 text-right flex-1">
-                                                        {c2Method}: 直前:{(p1Val / 1000).toLocaleString()}, 2年平均:{((p1Val + p2Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
+                                                        {c2Method}: 2期前:{(p2Val / 1000).toLocaleString()}, 2年平均:{((p2Val + p3Val) / 2000).toLocaleString()}千円 ÷ {shareCount50.toLocaleString()}株 =
                                                     </div>
                                                     <span className={`font-semibold whitespace-nowrap ${c2 === 0 ? 'text-red-600' : 'text-black'}`}>{c2.toLocaleString()}円</span>
                                                 </div>
@@ -810,8 +838,9 @@ export function OwnDataForm({ basicInfo, onBack, onNext, defaultValues }: OwnDat
                             })()}
                         </div>
                     </div>
+                </div>
 
-                    <div className="flex gap-4 pt-4">
+                <div className="flex gap-4 pt-4">
                         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={handleBack}>
                             戻る
                         </Button>

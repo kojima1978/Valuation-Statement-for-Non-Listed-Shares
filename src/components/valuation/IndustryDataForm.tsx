@@ -235,6 +235,20 @@ export function IndustryDataForm({ basicInfo, onBack, onNext, defaultValues }: I
                 <p className="text-muted-foreground">国税庁公表の類似業種比準価額算定上の数値を入力します。</p>
             </div>
 
+            <div className="text-center">
+                <a
+                    href="https://www.nta.go.jp/law/tsutatsu/kobetsu/hyoka/r07/2506/pdf/list_all.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+                >
+                    令和7年分の類似業種比準価額計算上の業種目及び業種目別株価等について（法令解釈通達）
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </a>
+            </div>
+
             <Card className="p-6 border-secondary/20 shadow-lg">
                 <form onSubmit={handleSubmit} className="space-y-8">
                     {/* Comparable Company Data */}

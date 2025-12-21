@@ -25,11 +25,11 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center min-h-[80vh] gap-8">
       <div className="text-center space-y-4">
         <h1 className="text-4xl md:text-6xl font-black text-primary tracking-tight">
-          株価<span className="text-secondary">P</span>OP
+          簡易株価計算
         </h1>
         <p className="text-lg text-muted-foreground font-medium">
           取引相場のない株式評価を、<br className="sm:hidden" />
-          もっとかんたん、ポップに。
+          もっとかんたんに。
         </p>
       </div>
 
