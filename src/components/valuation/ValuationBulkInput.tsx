@@ -17,10 +17,21 @@ interface ValuationBulkInputProps {
   defaultFinancials?: Financials | null;
 }
 
-export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, defaultFinancials }: ValuationBulkInputProps) {
-  const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">("auto");
-  const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">("auto");
-  const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">("auto");
+export function ValuationBulkInput({
+  onSubmit,
+  onBack,
+  defaultBasicInfo,
+  defaultFinancials,
+}: ValuationBulkInputProps) {
+  const [profitMethodC, setProfitMethodC] = useState<"auto" | "c1" | "c2">(
+    "auto",
+  );
+  const [profitMethodC1, setProfitMethodC1] = useState<"auto" | "c1" | "c2">(
+    "auto",
+  );
+  const [profitMethodC2, setProfitMethodC2] = useState<"auto" | "c1" | "c2">(
+    "auto",
+  );
 
   const [formData, setFormData] = useState({
     // Step 1: 基礎情報
@@ -73,9 +84,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
   useEffect(() => {
     if (defaultBasicInfo || defaultFinancials) {
       // Update profit method selections if available
-      if (defaultFinancials?.profitMethodC) setProfitMethodC(defaultFinancials.profitMethodC);
-      if (defaultFinancials?.profitMethodC1) setProfitMethodC1(defaultFinancials.profitMethodC1);
-      if (defaultFinancials?.profitMethodC2) setProfitMethodC2(defaultFinancials.profitMethodC2);
+      if (defaultFinancials?.profitMethodC)
+        setProfitMethodC(defaultFinancials.profitMethodC);
+      if (defaultFinancials?.profitMethodC1)
+        setProfitMethodC1(defaultFinancials.profitMethodC1);
+      if (defaultFinancials?.profitMethodC2)
+        setProfitMethodC2(defaultFinancials.profitMethodC2);
 
       setFormData({
         // Step 1: 基礎情報
@@ -87,52 +101,90 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
         // Step 2: 会社規模
         employees: defaultBasicInfo?.employees?.toString() || "",
-        totalAssets: defaultBasicInfo?.totalAssets ? (defaultBasicInfo.totalAssets / 1000).toString() : "",
-        sales: defaultBasicInfo?.sales ? (defaultBasicInfo.sales / 1000).toString() : "",
-        industryType: (defaultBasicInfo?.industryType || "Wholesale") as IndustryType,
+        totalAssets: defaultBasicInfo?.totalAssets
+          ? (defaultBasicInfo.totalAssets / 1000).toString()
+          : "",
+        sales: defaultBasicInfo?.sales
+          ? (defaultBasicInfo.sales / 1000).toString()
+          : "",
+        industryType: (defaultBasicInfo?.industryType ||
+          "Wholesale") as IndustryType,
 
         // Step 3: 自社データ（千円）
         ownDividendPrev: defaultFinancials?.ownDividendPrev?.toString() || "",
         ownDividend2Prev: defaultFinancials?.ownDividend2Prev?.toString() || "",
         ownDividend3Prev: defaultFinancials?.ownDividend3Prev?.toString() || "",
-        ownTaxableIncomePrev: defaultFinancials?.ownTaxableIncomePrev?.toString() || "",
-        ownCarryForwardLossPrev: defaultFinancials?.ownCarryForwardLossPrev?.toString() || "",
-        ownTaxableIncome2Prev: defaultFinancials?.ownTaxableIncome2Prev?.toString() || "",
-        ownCarryForwardLoss2Prev: defaultFinancials?.ownCarryForwardLoss2Prev?.toString() || "",
-        ownTaxableIncome3Prev: defaultFinancials?.ownTaxableIncome3Prev?.toString() || "",
-        ownCarryForwardLoss3Prev: defaultFinancials?.ownCarryForwardLoss3Prev?.toString() || "",
+        ownTaxableIncomePrev:
+          defaultFinancials?.ownTaxableIncomePrev?.toString() || "",
+        ownCarryForwardLossPrev:
+          defaultFinancials?.ownCarryForwardLossPrev?.toString() || "",
+        ownTaxableIncome2Prev:
+          defaultFinancials?.ownTaxableIncome2Prev?.toString() || "",
+        ownCarryForwardLoss2Prev:
+          defaultFinancials?.ownCarryForwardLoss2Prev?.toString() || "",
+        ownTaxableIncome3Prev:
+          defaultFinancials?.ownTaxableIncome3Prev?.toString() || "",
+        ownCarryForwardLoss3Prev:
+          defaultFinancials?.ownCarryForwardLoss3Prev?.toString() || "",
         ownCapitalPrev: defaultFinancials?.ownCapitalPrev?.toString() || "",
-        ownRetainedEarningsPrev: defaultFinancials?.ownRetainedEarningsPrev?.toString() || "",
+        ownRetainedEarningsPrev:
+          defaultFinancials?.ownRetainedEarningsPrev?.toString() || "",
         ownCapital2Prev: defaultFinancials?.ownCapital2Prev?.toString() || "",
-        ownRetainedEarnings2Prev: defaultFinancials?.ownRetainedEarnings2Prev?.toString() || "",
+        ownRetainedEarnings2Prev:
+          defaultFinancials?.ownRetainedEarnings2Prev?.toString() || "",
 
         // Step 4: 類似業種データ
-        industryStockPriceCurrent: defaultFinancials?.industryStockPriceCurrent?.toString() || "",
-        industryStockPrice1MonthBefore: defaultFinancials?.industryStockPrice1MonthBefore?.toString() || "",
-        industryStockPrice2MonthsBefore: defaultFinancials?.industryStockPrice2MonthsBefore?.toString() || "",
-        industryStockPricePrevYearAverage: defaultFinancials?.industryStockPricePrevYearAverage?.toString() || "",
-        industryDividendsYen: defaultFinancials?.industryDividends ? Math.floor(defaultFinancials.industryDividends).toString() : "",
-        industryDividendsSen: defaultFinancials?.industryDividends ? ((defaultFinancials.industryDividends % 1) * 10).toString() : "",
+        industryStockPriceCurrent:
+          defaultFinancials?.industryStockPriceCurrent?.toString() || "",
+        industryStockPrice1MonthBefore:
+          defaultFinancials?.industryStockPrice1MonthBefore?.toString() || "",
+        industryStockPrice2MonthsBefore:
+          defaultFinancials?.industryStockPrice2MonthsBefore?.toString() || "",
+        industryStockPricePrevYearAverage:
+          defaultFinancials?.industryStockPricePrevYearAverage?.toString() ||
+          "",
+        industryDividendsYen: defaultFinancials?.industryDividends
+          ? Math.floor(defaultFinancials.industryDividends).toString()
+          : "",
+        industryDividendsSen: defaultFinancials?.industryDividends
+          ? ((defaultFinancials.industryDividends % 1) * 10).toString()
+          : "",
         industryProfit: defaultFinancials?.industryProfit?.toString() || "",
-        industryBookValue: defaultFinancials?.industryBookValue?.toString() || "",
+        industryBookValue:
+          defaultFinancials?.industryBookValue?.toString() || "",
 
         // Step 5: 純資産データ（千円）
-        assetsBookValue: defaultFinancials?.assetsBookValue ? (defaultFinancials.assetsBookValue / 1000).toString() : "",
-        assetsInheritanceValue: defaultFinancials?.assetsInheritanceValue ? (defaultFinancials.assetsInheritanceValue / 1000).toString() : "",
-        landFairValueAddition: defaultFinancials?.landFairValueAddition ? (defaultFinancials.landFairValueAddition / 1000).toString() : "",
-        liabilitiesBookValue: defaultFinancials?.liabilitiesBookValue ? (defaultFinancials.liabilitiesBookValue / 1000).toString() : "",
-        liabilitiesInheritanceValue: defaultFinancials?.liabilitiesInheritanceValue ? (defaultFinancials.liabilitiesInheritanceValue / 1000).toString() : "",
+        assetsBookValue: defaultFinancials?.assetsBookValue
+          ? (defaultFinancials.assetsBookValue / 1000).toString()
+          : "",
+        assetsInheritanceValue: defaultFinancials?.assetsInheritanceValue
+          ? (defaultFinancials.assetsInheritanceValue / 1000).toString()
+          : "",
+        landFairValueAddition: defaultFinancials?.landFairValueAddition
+          ? (defaultFinancials.landFairValueAddition / 1000).toString()
+          : "",
+        liabilitiesBookValue: defaultFinancials?.liabilitiesBookValue
+          ? (defaultFinancials.liabilitiesBookValue / 1000).toString()
+          : "",
+        liabilitiesInheritanceValue:
+          defaultFinancials?.liabilitiesInheritanceValue
+            ? (defaultFinancials.liabilitiesInheritanceValue / 1000).toString()
+            : "",
       });
     }
   }, [defaultBasicInfo, defaultFinancials]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement> | { target: { name: string; value: string } }) => {
+  const handleChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | { target: { name: string; value: string } },
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleIndustryChange = (type: IndustryType) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       industryType: type,
       // 医療法人の場合は配当金額を0にする
@@ -172,9 +224,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
       ownCapital2Prev: pattern.ownCapital2Prev.toString(),
       ownRetainedEarnings2Prev: pattern.ownRetainedEarnings2Prev.toString(),
       industryStockPriceCurrent: pattern.industryStockPriceCurrent.toString(),
-      industryStockPrice1MonthBefore: pattern.industryStockPrice1MonthBefore.toString(),
-      industryStockPrice2MonthsBefore: pattern.industryStockPrice2MonthsBefore.toString(),
-      industryStockPricePrevYearAverage: pattern.industryStockPricePrevYearAverage.toString(),
+      industryStockPrice1MonthBefore:
+        pattern.industryStockPrice1MonthBefore.toString(),
+      industryStockPrice2MonthsBefore:
+        pattern.industryStockPrice2MonthsBefore.toString(),
+      industryStockPricePrevYearAverage:
+        pattern.industryStockPricePrevYearAverage.toString(),
       industryDividendsYen: pattern.industryDividendsYen.toString(),
       industryDividendsSen: pattern.industryDividendsSen.toString(),
       industryProfit: pattern.industryProfit.toString(),
@@ -183,7 +238,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
       assetsInheritanceValue: pattern.assetsInheritanceValue.toString(),
       landFairValueAddition: "0",
       liabilitiesBookValue: pattern.liabilitiesBookValue.toString(),
-      liabilitiesInheritanceValue: pattern.liabilitiesInheritanceValue.toString(),
+      liabilitiesInheritanceValue:
+        pattern.liabilitiesInheritanceValue.toString(),
     });
   };
 
@@ -200,7 +256,7 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     e.preventDefault();
 
     // Step 1: 基礎情報
-    const capital = Number(formData.capital.replace(/,/g, "") ) ;
+    const capital = Number(formData.capital.replace(/,/g, ""));
     const issuedShares = Number(formData.issuedShares.replace(/,/g, ""));
 
     // Step 2: 会社規模（千円を円に変換）
@@ -231,8 +287,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     };
 
     // Step 3: 自社データの計算
-    const capPrev = Number(formData.ownCapitalPrev) > 0 ? Number(formData.ownCapitalPrev) : capital;
-    const shareCount50 = (capPrev * 1000) > 0 ? Math.floor((capPrev * 1000) / 50) : issuedShares;
+    const capPrev =
+      Number(formData.ownCapitalPrev) > 0
+        ? Number(formData.ownCapitalPrev)
+        : capital;
+    const shareCount50 =
+      capPrev * 1000 > 0 ? Math.floor((capPrev * 1000) / 50) : issuedShares;
 
     // 配当（b）
     const divPrev = Number(formData.ownDividendPrev);
@@ -254,7 +314,8 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     const profit2PrevAmount = (p2 + l2) * 1000;
 
     const profitPerSharePrev = profitPrevAmount / shareCount50;
-    const profitPerShareAvg = ((profitPrevAmount + profit2PrevAmount) / 2) / shareCount50;
+    const profitPerShareAvg =
+      (profitPrevAmount + profit2PrevAmount) / 2 / shareCount50;
 
     // Calculate individual profit values
     const profitC1Value = Math.floor(Math.max(0, profitPerSharePrev)); // 単年
@@ -268,7 +329,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
       ownProfit = profitC2Value;
     } else {
       // auto: 最も低い値を自動選択
-      ownProfit = Math.floor(Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)));
+      ownProfit = Math.floor(
+        Math.max(0, Math.min(profitPerSharePrev, profitPerShareAvg)),
+      );
     }
 
     // 純資産価額（d）
@@ -321,27 +384,42 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
     const ownBookValueD2 = Math.floor(rawOwnBookValueD2);
 
     // 比準要素数0の会社の判定: b1, c1, c2 がすべて0の場合
-    const isZeroElementCompany = ownDividendsB1 === 0 && ownProfitC1 === 0 && ownProfitC2 === 0;
+    const isZeroElementCompany =
+      ownDividendsB1 === 0 && ownProfitC1 === 0 && ownProfitC2 === 0;
 
     // Step 4: 類似業種データ
-    const industryStockPriceCurrent = Number(formData.industryStockPriceCurrent);
-    const industryStockPrice1MonthBefore = Number(formData.industryStockPrice1MonthBefore);
-    const industryStockPrice2MonthsBefore = Number(formData.industryStockPrice2MonthsBefore);
-    const industryStockPricePrevYearAverage = Number(formData.industryStockPricePrevYearAverage);
+    const industryStockPriceCurrent = Number(
+      formData.industryStockPriceCurrent,
+    );
+    const industryStockPrice1MonthBefore = Number(
+      formData.industryStockPrice1MonthBefore,
+    );
+    const industryStockPrice2MonthsBefore = Number(
+      formData.industryStockPrice2MonthsBefore,
+    );
+    const industryStockPricePrevYearAverage = Number(
+      formData.industryStockPricePrevYearAverage,
+    );
 
     const divYen = Number(formData.industryDividendsYen);
     const divSen = Number(formData.industryDividendsSen);
-    const industryDividends = divYen + (divSen * 0.1);
+    const industryDividends = divYen + divSen * 0.1;
 
     const industryProfit = Number(formData.industryProfit);
     const industryBookValue = Number(formData.industryBookValue);
 
     // Step 5: 純資産データ（千円を円に変換）
     const assetsBookValue = Number(formData.assetsBookValue) * 1000;
-    const assetsInheritanceValue = formData.assetsInheritanceValue ? Number(formData.assetsInheritanceValue) * 1000 : undefined;
-    const landFairValueAddition = formData.landFairValueAddition ? Number(formData.landFairValueAddition) * 1000 : undefined;
+    const assetsInheritanceValue = formData.assetsInheritanceValue
+      ? Number(formData.assetsInheritanceValue) * 1000
+      : undefined;
+    const landFairValueAddition = formData.landFairValueAddition
+      ? Number(formData.landFairValueAddition) * 1000
+      : undefined;
     const liabilitiesBookValue = Number(formData.liabilitiesBookValue) * 1000;
-    const liabilitiesInheritanceValue = formData.liabilitiesInheritanceValue ? Number(formData.liabilitiesInheritanceValue) * 1000 : undefined;
+    const liabilitiesInheritanceValue = formData.liabilitiesInheritanceValue
+      ? Number(formData.liabilitiesInheritanceValue) * 1000
+      : undefined;
 
     const financials: Financials = {
       // 自社データの結果
@@ -409,8 +487,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
           {/* ダミーデータ読み込みボタン */}
           <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4 space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-amber-900">テスト用ダミーデータ</span>
-              <span className="text-xs text-amber-700">（動作確認用のサンプルデータを自動入力）</span>
+              <span className="text-sm font-bold text-amber-900">
+                テスト用ダミーデータ
+              </span>
+              <span className="text-xs text-amber-700">
+                （動作確認用のサンプルデータを自動入力）
+              </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Button
@@ -443,7 +525,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
         {/* Step 1: 基礎情報 */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">Step 1: 基礎情報</h3>
+          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">
+            Step 1: 基礎情報
+          </h3>
 
           <div className="space-y-2">
             <Label htmlFor="companyName">会社名</Label>
@@ -495,7 +579,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   required
                   className="pr-12 text-right"
                 />
-                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                  千円
+                </span>
               </div>
             </div>
             <div className="space-y-2">
@@ -510,7 +596,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   required
                   className="pr-12 text-right"
                 />
-                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">株</span>
+                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                  株
+                </span>
               </div>
             </div>
           </div>
@@ -518,7 +606,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
         {/* Step 2: 会社規模 */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">Step 2: 会社規模</h3>
+          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">
+            Step 2: 会社規模
+          </h3>
 
           <div className="space-y-2">
             <Label>業種区分</Label>
@@ -583,7 +673,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   required
                   className="pr-12 text-right"
                 />
-                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">人</span>
+                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                  人
+                </span>
               </div>
             </div>
             <div className="space-y-2">
@@ -598,7 +690,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   required
                   className="pr-12 text-right"
                 />
-                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                  千円
+                </span>
               </div>
             </div>
             <div className="space-y-2">
@@ -613,7 +707,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   required
                   className="pr-12 text-right"
                 />
-                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                  千円
+                </span>
               </div>
             </div>
           </div>
@@ -621,7 +717,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
         {/* Step 3: 自社データ */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">Step 3: 自社データ</h3>
+          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">
+            Step 3: 自社データ
+          </h3>
 
           <div className="space-y-2 bg-blue-50/50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between">
@@ -634,7 +732,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
             </div>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="ownDividendPrev" className="text-xs">直前期</Label>
+                <Label htmlFor="ownDividendPrev" className="text-xs">
+                  直前期
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="ownDividendPrev"
@@ -644,13 +744,17 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     value={formData.ownDividendPrev}
                     required
                     disabled={formData.industryType === "MedicalCorporation"}
-                    className={`pr-12 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
+                    className={`pr-12 text-right ${formData.industryType === "MedicalCorporation" ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                   />
-                  <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                  <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                    千円
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ownDividend2Prev" className="text-xs">2期前</Label>
+                <Label htmlFor="ownDividend2Prev" className="text-xs">
+                  2期前
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="ownDividend2Prev"
@@ -660,13 +764,17 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     value={formData.ownDividend2Prev}
                     required
                     disabled={formData.industryType === "MedicalCorporation"}
-                    className={`pr-12 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
+                    className={`pr-12 text-right ${formData.industryType === "MedicalCorporation" ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                   />
-                  <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                  <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                    千円
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ownDividend3Prev" className="text-xs">3期前</Label>
+                <Label htmlFor="ownDividend3Prev" className="text-xs">
+                  3期前
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="ownDividend3Prev"
@@ -676,9 +784,11 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     value={formData.ownDividend3Prev}
                     required
                     disabled={formData.industryType === "MedicalCorporation"}
-                    className={`pr-12 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
+                    className={`pr-12 text-right ${formData.industryType === "MedicalCorporation" ? "bg-gray-100 cursor-not-allowed" : "bg-white"}`}
                   />
-                  <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                  <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                    千円
+                  </span>
                 </div>
               </div>
             </div>
@@ -821,7 +931,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                 <Label className="text-xs font-bold">直前期</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="ownTaxableIncomePrev" className="text-[10px] text-muted-foreground">利益</Label>
+                    <Label
+                      htmlFor="ownTaxableIncomePrev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      利益
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownTaxableIncomePrev"
@@ -832,11 +947,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="ownCarryForwardLossPrev" className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
+                    <Label
+                      htmlFor="ownCarryForwardLossPrev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      繰越欠損金の控除額
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownCarryForwardLossPrev"
@@ -847,7 +969,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -856,7 +980,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                 <Label className="text-xs font-bold">2期前</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="ownTaxableIncome2Prev" className="text-[10px] text-muted-foreground">利益</Label>
+                    <Label
+                      htmlFor="ownTaxableIncome2Prev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      利益
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownTaxableIncome2Prev"
@@ -867,11 +996,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="ownCarryForwardLoss2Prev" className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
+                    <Label
+                      htmlFor="ownCarryForwardLoss2Prev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      繰越欠損金の控除額
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownCarryForwardLoss2Prev"
@@ -882,7 +1018,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -891,7 +1029,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                 <Label className="text-xs font-bold">3期前</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="ownTaxableIncome3Prev" className="text-[10px] text-muted-foreground">利益</Label>
+                    <Label
+                      htmlFor="ownTaxableIncome3Prev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      利益
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownTaxableIncome3Prev"
@@ -902,11 +1045,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="ownCarryForwardLoss3Prev" className="text-[10px] text-muted-foreground">繰越欠損金の控除額</Label>
+                    <Label
+                      htmlFor="ownCarryForwardLoss3Prev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      繰越欠損金の控除額
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownCarryForwardLoss3Prev"
@@ -917,7 +1067,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -933,7 +1085,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                 <Label className="text-xs font-bold">直前期</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="ownCapitalPrev" className="text-[10px] text-muted-foreground">資本金</Label>
+                    <Label
+                      htmlFor="ownCapitalPrev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      資本金
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownCapitalPrev"
@@ -944,11 +1101,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="ownRetainedEarningsPrev" className="text-[10px] text-muted-foreground">繰越利益剰余金</Label>
+                    <Label
+                      htmlFor="ownRetainedEarningsPrev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      繰越利益剰余金
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownRetainedEarningsPrev"
@@ -959,7 +1123,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -968,7 +1134,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                 <Label className="text-xs font-bold">2期前</Label>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="ownCapital2Prev" className="text-[10px] text-muted-foreground">資本金</Label>
+                    <Label
+                      htmlFor="ownCapital2Prev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      資本金
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownCapital2Prev"
@@ -979,11 +1150,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="ownRetainedEarnings2Prev" className="text-[10px] text-muted-foreground">繰越利益剰余金</Label>
+                    <Label
+                      htmlFor="ownRetainedEarnings2Prev"
+                      className="text-[10px] text-muted-foreground"
+                    >
+                      繰越利益剰余金
+                    </Label>
                     <div className="relative">
                       <NumberInput
                         id="ownRetainedEarnings2Prev"
@@ -994,7 +1172,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                         required
                         className="pr-12 text-right bg-white"
                       />
-                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">千円</span>
+                      <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">
+                        千円
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1005,14 +1185,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
         {/* Step 4: 類似業種データ */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">Step 4: 類似業種データ</h3>
+          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">
+            Step 4: 類似業種データ
+          </h3>
 
           <div className="space-y-2">
             <Label>A: 株価（円）</Label>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground">
-                  {taxationMonth ? `課税時期の月（${taxationMonth}月）` : "課税時期の月"}
+                  {taxationMonth
+                    ? `課税時期の月（${taxationMonth}月）`
+                    : "課税時期の月"}
                 </Label>
                 <div className="relative">
                   <NumberInput
@@ -1022,7 +1206,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-8 text-right"
                   />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    円
+                  </span>
                 </div>
               </div>
               <div>
@@ -1035,7 +1221,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-8 text-right"
                   />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    円
+                  </span>
                 </div>
               </div>
               <div>
@@ -1048,11 +1236,15 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-8 text-right"
                   />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    円
+                  </span>
                 </div>
               </div>
               <div>
-                <Label className="text-xs text-muted-foreground">前年平均</Label>
+                <Label className="text-xs text-muted-foreground">
+                  前年平均
+                </Label>
                 <div className="relative">
                   <NumberInput
                     name="industryStockPricePrevYearAverage"
@@ -1061,7 +1253,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-8 text-right"
                   />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    円
+                  </span>
                 </div>
               </div>
             </div>
@@ -1085,9 +1279,11 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     onChange={handleChange}
                     placeholder="0"
                     disabled={formData.industryType === "MedicalCorporation"}
-                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? "bg-gray-100 cursor-not-allowed" : ""}`}
                   />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    円
+                  </span>
                 </div>
                 <div className="w-20 relative">
                   <NumberInput
@@ -1096,9 +1292,11 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     onChange={handleChange}
                     placeholder="0"
                     disabled={formData.industryType === "MedicalCorporation"}
-                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className={`pr-8 text-right ${formData.industryType === "MedicalCorporation" ? "bg-gray-100 cursor-not-allowed" : ""}`}
                   />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">銭</span>
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    銭
+                  </span>
                 </div>
               </div>
             </div>
@@ -1113,7 +1311,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   placeholder="0"
                   className="pr-8 text-right"
                 />
-                <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                  円
+                </span>
               </div>
             </div>
             <div className="space-y-2">
@@ -1127,7 +1327,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                   placeholder="0"
                   className="pr-8 text-right"
                 />
-                <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">円</span>
+                <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                  円
+                </span>
               </div>
             </div>
           </div>
@@ -1135,13 +1337,20 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
 
         {/* Step 5: 純資産データ */}
         <div className="space-y-4">
-          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">Step 5: 純資産データ</h3>
+          <h3 className="text-lg font-bold border-b-2 border-primary pb-2">
+            Step 5: 純資産データ
+          </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4 p-4 rounded-lg bg-primary/5">
               <Label className="font-bold underline">資産の部（千円）</Label>
               <div className="space-y-2">
-                <Label htmlFor="assetsInheritanceValue" className="text-sm font-bold">相続税評価額</Label>
+                <Label
+                  htmlFor="assetsInheritanceValue"
+                  className="text-sm font-bold"
+                >
+                  相続税評価額
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="assetsInheritanceValue"
@@ -1151,11 +1360,18 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-12 text-right"
                   />
-                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                    千円
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="landFairValueAddition" className="text-sm font-bold">土地の時価を加算（相続税評価額*0.25）</Label>
+                <Label
+                  htmlFor="landFairValueAddition"
+                  className="text-sm font-bold"
+                >
+                  土地の時価を加算（相続税評価額*0.25）
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="landFairValueAddition"
@@ -1165,11 +1381,15 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-12 text-right"
                   />
-                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                    千円
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="assetsBookValue" className="text-sm">帳簿価額</Label>
+                <Label htmlFor="assetsBookValue" className="text-sm">
+                  帳簿価額
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="assetsBookValue"
@@ -1180,7 +1400,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     required
                     className="pr-12 text-right"
                   />
-                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                    千円
+                  </span>
                 </div>
               </div>
             </div>
@@ -1188,7 +1410,12 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
             <div className="space-y-4 p-4 rounded-lg bg-primary/5">
               <Label className="font-bold underline">負債の部（千円）</Label>
               <div className="space-y-2">
-                <Label htmlFor="liabilitiesInheritanceValue" className="text-sm font-bold">相続税評価額</Label>
+                <Label
+                  htmlFor="liabilitiesInheritanceValue"
+                  className="text-sm font-bold"
+                >
+                  相続税評価額
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="liabilitiesInheritanceValue"
@@ -1198,11 +1425,15 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     placeholder="0"
                     className="pr-12 text-right"
                   />
-                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                    千円
+                  </span>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="liabilitiesBookValue" className="text-sm">帳簿価額</Label>
+                <Label htmlFor="liabilitiesBookValue" className="text-sm">
+                  帳簿価額
+                </Label>
                 <div className="relative">
                   <NumberInput
                     id="liabilitiesBookValue"
@@ -1213,7 +1444,9 @@ export function ValuationBulkInput({ onSubmit, onBack, defaultBasicInfo, default
                     required
                     className="pr-12 text-right"
                   />
-                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">千円</span>
+                  <span className="absolute right-3 top-2.5 text-muted-foreground text-sm">
+                    千円
+                  </span>
                 </div>
               </div>
             </div>

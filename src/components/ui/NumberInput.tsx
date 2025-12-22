@@ -1,67 +1,50 @@
 "use client";
 
 import * as React from "react";
-import { Input } from "@/components/ui/Input";
+import { NumericFormat } from "react-number-format";
+import { cn } from "@/lib/utils";
 
-interface NumberInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
-    onChange: (e: { target: { name: string; value: string } }) => void;
+interface NumberInputProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "onChange" | "type"
+> {
+  onChange: (e: { target: { name: string; value: string } }) => void;
 }
 
 export const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
-    ({ value, onChange, name, ...props }, ref) => {
-        // Values passed in should be raw strings/numbers (e.g. "1000")
-        // We format them for display (e.g. "1,000")
-
-        const format = (val: string | number | undefined) => {
-            if (!val) return "";
-            const num = Number(val);
-            if (isNaN(num)) return val.toString();
-            return num.toLocaleString();
-        };
-
-        const [displayValue, setDisplayValue] = React.useState(format(value as string));
-
-        React.useEffect(() => {
-            setDisplayValue(format(value as string));
-        }, [value]);
-
-        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            const val = e.target.value;
-            // Allow only numbers and commas
-            const rawValue = val.replace(/,/g, "");
-
-            if (rawValue === "" || /^-?\d*$/.test(rawValue)) {
-                setDisplayValue(val);
-                // Propagate raw value to parent
-                onChange({
-                    target: {
-                        name: name || "",
-                        value: rawValue
-                    }
-                });
-            }
-        };
-
-        const handleBlur = () => {
-            // Re-format on blur to ensure clean "1,000" look even if user typed craziness
-            // But actually, useEffect already handles this if parent state updates.
-            // If parent doesn't update (invalid), we might want to revert?
-            // For now, rely on parent updating 'value' prop which triggers useEffect.
-        };
-
-        return (
-            <Input
-                {...props}
-                ref={ref}
-                type="text"
-                name={name}
-                value={displayValue}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={`text-right ${props.className || ""}`}
-            />
-        );
-    }
+  (
+    { value, onChange, name, className, disabled, placeholder, required, id },
+    ref,
+  ) => (
+    <NumericFormat
+      getInputRef={ref}
+      id={id}
+      name={name}
+      value={value as string}
+      onValueChange={(values) => {
+        onChange({
+          target: {
+            name: name || "",
+            value: values.value,
+          },
+        });
+      }}
+      thousandSeparator=","
+      allowNegative={true}
+      decimalScale={0}
+      disabled={disabled}
+      placeholder={placeholder}
+      required={required}
+      className={cn(
+        "flex h-11 w-full rounded-xl border-2 border-input bg-background px-3 py-2 text-sm ring-offset-background",
+        "placeholder:text-muted-foreground",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        "text-right",
+        className,
+      )}
+    />
+  ),
 );
 
 NumberInput.displayName = "NumberInput";

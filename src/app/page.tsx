@@ -9,16 +9,16 @@ export default function Home() {
 
   const handleStepByStepClick = () => {
     // sessionStorageをクリア
-    sessionStorage.removeItem('valuationBasicInfo');
-    sessionStorage.removeItem('valuationFinancials');
-    router.push('/valuation/step1');
+    sessionStorage.removeItem("valuationBasicInfo");
+    sessionStorage.removeItem("valuationFinancials");
+    router.push("/valuation/step1");
   };
 
   const handleBulkInputClick = () => {
     // sessionStorageをクリア
-    sessionStorage.removeItem('valuationBasicInfo');
-    sessionStorage.removeItem('valuationFinancials');
-    router.push('/valuation/bulk');
+    sessionStorage.removeItem("valuationBasicInfo");
+    sessionStorage.removeItem("valuationFinancials");
+    router.push("/valuation/bulk");
   };
 
   return (
@@ -28,7 +28,8 @@ export default function Home() {
           簡易株価計算
         </h1>
         <p className="text-lg text-muted-foreground font-medium">
-          取引相場のない株式評価を、<br className="sm:hidden" />
+          取引相場のない株式評価を、
+          <br className="sm:hidden" />
           もっとかんたんに。
         </p>
       </div>
@@ -36,9 +37,12 @@ export default function Home() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full px-4">
         <Card className="p-8 text-center space-y-6 border-4 border-secondary/20 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
           <div className="space-y-2">
-            <h2 className="text-xl font-bold text-foreground">ステップバイステップ</h2>
+            <h2 className="text-xl font-bold text-foreground">
+              ステップバイステップ
+            </h2>
             <p className="text-sm text-muted-foreground">
-              会社規模の判定から評価額の算出まで、<br />
+              会社規模の判定から評価額の算出まで、
+              <br />
               ステップ形式でガイド付きで進めます。
             </p>
           </div>
@@ -56,7 +60,8 @@ export default function Home() {
           <div className="space-y-2">
             <h2 className="text-xl font-bold text-foreground">一覧入力</h2>
             <p className="text-sm text-muted-foreground">
-              すべてのデータを一度に入力して、<br />
+              すべてのデータを一度に入力して、
+              <br />
               素早く評価額を算出します。
             </p>
           </div>

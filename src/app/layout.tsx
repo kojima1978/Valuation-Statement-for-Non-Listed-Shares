@@ -15,17 +15,23 @@ export default function RootLayout({
     <html lang="ja">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&display=swap" rel="stylesheet" />
-        <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap"
+          rel="stylesheet"
+        />
       </head>
-      <body
-        className={`antialiased bg-background text-foreground`}
-      >
+      <body className={`antialiased bg-background text-foreground`}>
         <main className="min-h-screen p-4 sm:p-8">
-          <div className="max-w-4xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-4xl mx-auto">{children}</div>
         </main>
       </body>
     </html>

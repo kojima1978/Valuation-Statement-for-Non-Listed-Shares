@@ -2,32 +2,32 @@
 
 :root {
   /* Soft Green Theme */
-  --primary: #86C166;
+  --primary: #86c166;
   /* Naeiro (Light Green) */
-  --primary-foreground: #FFFFFF;
+  --primary-foreground: #ffffff;
 
-  --secondary: #6B8E23;
+  --secondary: #6b8e23;
   /* Olive Drab */
-  --secondary-foreground: #FFFFFF;
+  --secondary-foreground: #ffffff;
 
-  --accent: #F5DEB3;
+  --accent: #f5deb3;
   /* Wheat */
-  --accent-foreground: #292F36;
+  --accent-foreground: #292f36;
 
-  --background: #F0F8F0;
+  --background: #f0f8f0;
   /* Very Pale Green */
-  --foreground: #2F3E30;
+  --foreground: #2f3e30;
   /* Dark Green-Grey */
 
-  --muted: #E8F5E9;
-  --muted-foreground: #556B2F;
+  --muted: #e8f5e9;
+  --muted-foreground: #556b2f;
 
-  --card: #FFFFFF;
-  --card-foreground: #2F3E30;
+  --card: #ffffff;
+  --card-foreground: #2f3e30;
 
-  --border: #C8E6C9;
-  --input: #FFFFFF;
-  --ring: #86C166;
+  --border: #c8e6c9;
+  --input: #ffffff;
+  --ring: #86c166;
 }
 
 @theme inline {
