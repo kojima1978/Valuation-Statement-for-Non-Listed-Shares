@@ -9,6 +9,7 @@ import {
   calculateCorporateTaxFairValue,
   calculateOwnFinancials,
 } from "@/lib/valuation-logic";
+import { PrintAllSteps } from "./PrintAllSteps";
 
 interface ValuationSummaryProps {
   basicInfo: BasicInfo;
@@ -69,16 +70,23 @@ export function ValuationSummary({
   const totalShares = basicInfo.issuedShares || 1;
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-black text-primary">比較表</h2>
-        <p className="text-muted-foreground">
-          各ステップの評価結果を比較します。
-        </p>
-        <p className="text-sm text-muted-foreground">
-          発行済株式数: {totalShares.toLocaleString()}株
-        </p>
+    <>
+      {/* Print-only view */}
+      <div className="hidden print:block">
+        <PrintAllSteps basicInfo={basicInfo} financials={financials} />
       </div>
+
+      {/* Screen view */}
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 print:hidden">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-black text-primary">比較表</h2>
+          <p className="text-muted-foreground">
+            各ステップの評価結果を比較します。
+          </p>
+          <p className="text-sm text-muted-foreground">
+            発行済株式数: {totalShares.toLocaleString()}株
+          </p>
+        </div>
 
       <div className="space-y-6">
         {/* 比較表 */}
@@ -235,16 +243,27 @@ export function ValuationSummary({
         </Card>
       </div>
 
-      <div className="flex flex-col-reverse sm:flex-row justify-center gap-4 pt-8">
+      <div className="flex flex-col-reverse sm:flex-row justify-center gap-4 pt-8 no-print">
         <Button type="button" variant="outline" onClick={onBack} size="lg">
           戻る
         </Button>
         {onHome && (
-          <Button type="button" variant="outline" onClick={onHome} size="lg">
-            トップに戻る
-          </Button>
+          <>
+            <Button type="button" variant="outline" onClick={onHome} size="lg">
+              トップに戻る
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.print()}
+              size="lg"
+            >
+              一括印刷
+            </Button>
+          </>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

@@ -269,19 +269,19 @@ export function IndustryDataForm({
                   </div>
                   <div>
                     <Label
-                      htmlFor="industryStockPriceCurrent"
+                      htmlFor="industryStockPrice2MonthsBefore"
                       className="text-xs text-muted-foreground"
                     >
-                      {taxationMonth
-                        ? `課税時期の月（${taxationMonth}月）`
-                        : "課税時期の月"}
+                      {twoMonthsBefore
+                        ? `前々月（${twoMonthsBefore}月）`
+                        : "前々月"}
                     </Label>
                     <div className="relative">
                       <NumberInput
-                        id="industryStockPriceCurrent"
-                        name="industryStockPriceCurrent"
+                        id="industryStockPrice2MonthsBefore"
+                        name="industryStockPrice2MonthsBefore"
                         placeholder="0"
-                        value={formData.industryStockPriceCurrent}
+                        value={formData.industryStockPrice2MonthsBefore}
                         onChange={handleChange}
                         className="pr-8 text-right bg-white"
                       />
@@ -313,19 +313,19 @@ export function IndustryDataForm({
                   </div>
                   <div>
                     <Label
-                      htmlFor="industryStockPrice2MonthsBefore"
+                      htmlFor="industryStockPriceCurrent"
                       className="text-xs text-muted-foreground"
                     >
-                      {twoMonthsBefore
-                        ? `前々月（${twoMonthsBefore}月）`
-                        : "前々月"}
+                      {taxationMonth
+                        ? `課税時期の月（${taxationMonth}月）`
+                        : "課税時期の月"}
                     </Label>
                     <div className="relative">
                       <NumberInput
-                        id="industryStockPrice2MonthsBefore"
-                        name="industryStockPrice2MonthsBefore"
+                        id="industryStockPriceCurrent"
+                        name="industryStockPriceCurrent"
                         placeholder="0"
-                        value={formData.industryStockPrice2MonthsBefore}
+                        value={formData.industryStockPriceCurrent}
                         onChange={handleChange}
                         className="pr-8 text-right bg-white"
                       />
