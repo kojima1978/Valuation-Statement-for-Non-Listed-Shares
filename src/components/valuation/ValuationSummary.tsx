@@ -9,6 +9,7 @@ import {
   calculateCorporateTaxFairValue,
   calculateOwnFinancials,
 } from "@/lib/valuation-logic";
+import { exportValuationData } from "@/lib/data-export-import";
 
 interface ValuationSummaryProps {
   basicInfo: BasicInfo;
@@ -246,6 +247,14 @@ export function ValuationSummary({
             トップに戻る
           </Button>
         )}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => exportValuationData(basicInfo, financials)}
+          size="lg"
+        >
+          データをエクスポート
+        </Button>
         {onDetails && (
           <Button type="button" variant="outline" onClick={onDetails} size="lg">
             詳細を見る

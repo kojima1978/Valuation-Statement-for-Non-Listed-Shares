@@ -8,6 +8,7 @@ import {
   calculateFinalValuation,
   calculateOwnFinancials,
 } from "@/lib/valuation-logic";
+import { exportValuationData } from "@/lib/data-export-import";
 
 interface ValuationSimulationProps {
   basicInfo: BasicInfo;
@@ -192,6 +193,14 @@ export function ValuationSimulation({
             トップに戻る
           </Button>
         )}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => exportValuationData(basicInfo, financials)}
+          size="lg"
+        >
+          データをエクスポート
+        </Button>
         {onSummary && (
           <Button
             type="button"

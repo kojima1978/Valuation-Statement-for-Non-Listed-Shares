@@ -9,6 +9,7 @@ import { NumberInput } from "@/components/ui/NumberInput";
 import { BasicInfo, Financials } from "@/types/valuation";
 import { calculateCompanySizeAndL, IndustryType } from "@/lib/valuation-logic";
 import { DUMMY_DATA_PATTERNS, DummyDataPatternKey } from "@/lib/dummy-data";
+import { exportValuationData } from "@/lib/data-export-import";
 
 interface ValuationBulkInputProps {
   onSubmit: (basicInfo: BasicInfo, financials: Financials) => void;

@@ -3,9 +3,18 @@
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import {
+  exportValuationData,
+  importValuationData,
+  loadFromSessionStorage,
+  saveToSessionStorage,
+} from "@/lib/data-export-import";
 
 export default function Home() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   const handleStepByStepClick = () => {
     // sessionStorageをクリア
@@ -19,6 +28,43 @@ export default function Home() {
     sessionStorage.removeItem("valuationBasicInfo");
     sessionStorage.removeItem("valuationFinancials");
     router.push("/valuation/bulk");
+  };
+
+  const handleExportClick = () => {
+    const { basicInfo, financials } = loadFromSessionStorage();
+    if (!basicInfo || !financials) {
+      alert("エクスポートするデータがありません。先にデータを入力してください。");
+      return;
+    }
+    exportValuationData(basicInfo, financials);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setImportError(null);
+      const data = await importValuationData(file);
+      saveToSessionStorage(data.basicInfo, data.financials);
+      alert("データを読み込みました。一覧入力画面に移動します。");
+      router.push("/valuation/bulk");
+    } catch (error) {
+      setImportError(
+        error instanceof Error ? error.message : "データの読み込みに失敗しました",
+      );
+    } finally {
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   return (
@@ -75,6 +121,50 @@ export default function Home() {
           </Button>
         </Card>
       </div>
+
+      {/* データのエクスポート/インポート */}
+      <div className="mt-8 space-y-4 max-w-2xl w-full px-4">
+        <div className="border-t border-gray-200 pt-6">
+          <h3 className="text-center text-lg font-bold text-foreground mb-4">
+            データの保存・読み込み
+          </h3>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleExportClick}
+              className="flex-1 sm:flex-none"
+            >
+              データをエクスポート
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleImportClick}
+              className="flex-1 sm:flex-none"
+            >
+              データをインポート
+            </Button>
+          </div>
+          {importError && (
+            <p className="text-center text-sm text-red-600 mt-2">
+              {importError}
+            </p>
+          )}
+          <p className="text-center text-xs text-muted-foreground mt-4">
+            入力したデータをJSONファイルとして保存・読み込みできます
+          </p>
+        </div>
+      </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileChange}
+        className="hidden"
+      />
     </div>
   );
 }
