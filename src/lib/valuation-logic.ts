@@ -264,26 +264,49 @@ export function calculateDetailedSimilarIndustryMethod(
   };
 }
 
-// Deprecated or kept for reference? Can just alias to new one if needed, but easier to just use new one.
-export function calculateSimilarIndustryMethodValue(
-  A: number,
-  B: number,
-  C: number,
-  D: number,
-  b: number,
-  c: number,
-  d: number,
-  multiplier: number,
-): number {
-  // This old signature doesn't support conversion correctly without extra info.
-  // It was just S_50_raw (floored) basically.
-  // We should migrate away from this. For now, return what it used to return (A * ratio * multiplier).
-  if (B === 0 || C === 0 || D === 0) return 0;
-  const rB = b / B;
-  const rC = c / C;
-  const rD = d / D;
-  const avgRatio = (rB + rC + rD) / 3;
-  return Math.floor(A * avgRatio * multiplier);
+/**
+ * Helper function to calculate comparable value (S) from industry data
+ */
+function calculateComparableValue(
+  financials: Financials,
+  basicInfo: BasicInfo,
+) {
+  const {
+    industryStockPriceCurrent,
+    industryStockPrice1MonthBefore,
+    industryStockPrice2MonthsBefore,
+    industryStockPricePrevYearAverage,
+    industryDividends: B,
+    industryProfit: C,
+    industryBookValue: D,
+    ownDividends: b,
+    ownProfit: c,
+    ownBookValue: d,
+  } = financials;
+
+  const possibleAs = [
+    industryStockPriceCurrent,
+    industryStockPrice1MonthBefore,
+    industryStockPrice2MonthsBefore,
+    industryStockPricePrevYearAverage,
+  ].filter((n) => n > 0);
+  const A = possibleAs.length > 0 ? Math.min(...possibleAs) : 0;
+
+  const multiplier = basicInfo.sizeMultiplier || 0.7;
+
+  const simResult = calculateDetailedSimilarIndustryMethod(
+    A,
+    B,
+    C,
+    D,
+    b,
+    c,
+    d,
+    multiplier,
+    basicInfo,
+  );
+
+  return simResult.value;
 }
 
 /**
@@ -380,7 +403,7 @@ export function calculateFinalValuation(
   const liabilitiesInheritanceValue =
     financials.liabilitiesInheritanceValue ?? liabilitiesBookValue;
 
-  const { issuedShares, size, sizeMultiplier } = basicInfo;
+  const { issuedShares, size } = basicInfo;
   let lRatio = basicInfo.lRatio;
 
   // 比準要素数0の会社の場合、L=0として扱う（純資産価額のみで評価）
@@ -406,43 +429,7 @@ export function calculateFinalValuation(
   const netAssetPerShare = Math.max(0, netAssetTotalAdjusted / issuedShares);
 
   // 2. Comparable Company Value (S)
-  const {
-    industryStockPriceCurrent,
-    industryStockPrice1MonthBefore,
-    industryStockPrice2MonthsBefore,
-    industryStockPricePrevYearAverage,
-    industryDividends: B,
-    industryProfit: C,
-    industryBookValue: D,
-    ownDividends: b,
-    ownProfit: c,
-    ownBookValue: d,
-  } = financials;
-
-  const possibleAs = [
-    industryStockPriceCurrent,
-    industryStockPrice1MonthBefore,
-    industryStockPrice2MonthsBefore,
-    industryStockPricePrevYearAverage,
-  ].filter((n) => n > 0);
-  const A = possibleAs.length > 0 ? Math.min(...possibleAs) : 0;
-
-  const multiplier = sizeMultiplier || 0.7; // default
-
-  // Use Centralized Logic
-  const simResult = calculateDetailedSimilarIndustryMethod(
-    A,
-    B,
-    C,
-    D,
-    b,
-    c,
-    d,
-    multiplier,
-    basicInfo,
-  );
-
-  const comparableValue = simResult.value;
+  const comparableValue = calculateComparableValue(financials, basicInfo);
 
   // 3. Selection
   let finalValue = 0;
@@ -554,7 +541,7 @@ export function calculateCorporateTaxFairValue(
     financials.liabilitiesInheritanceValue ?? liabilitiesBookValue;
   const landFairValueAddition = financials.landFairValueAddition ?? 0;
 
-  const { issuedShares, sizeMultiplier } = basicInfo;
+  const { issuedShares } = basicInfo;
 
   // 1. Net Asset Value per Share (N) - 法人税法上の時価では税金調整なし
   // 土地の時価を加算（相続税評価額*0.25）を追加
@@ -565,42 +552,7 @@ export function calculateCorporateTaxFairValue(
   const netAssetPerShare = Math.max(0, netInh / issuedShares);
 
   // 2. Comparable Company Value (S)
-  const {
-    industryStockPriceCurrent,
-    industryStockPrice1MonthBefore,
-    industryStockPrice2MonthsBefore,
-    industryStockPricePrevYearAverage,
-    industryDividends: B,
-    industryProfit: C,
-    industryBookValue: D,
-    ownDividends: b,
-    ownProfit: c,
-    ownBookValue: d,
-  } = financials;
-
-  const possibleAs = [
-    industryStockPriceCurrent,
-    industryStockPrice1MonthBefore,
-    industryStockPrice2MonthsBefore,
-    industryStockPricePrevYearAverage,
-  ].filter((n) => n > 0);
-  const A = possibleAs.length > 0 ? Math.min(...possibleAs) : 0;
-
-  const multiplier = sizeMultiplier || 0.7;
-
-  const simResult = calculateDetailedSimilarIndustryMethod(
-    A,
-    B,
-    C,
-    D,
-    b,
-    c,
-    d,
-    multiplier,
-    basicInfo,
-  );
-
-  const comparableValue = simResult.value;
+  const comparableValue = calculateComparableValue(financials, basicInfo);
 
   // 3. Selection based on Corporate Tax Law
   let finalValue = 0;
