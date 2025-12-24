@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ValuationSummary } from "@/components/valuation/ValuationSummary";
+import { PrintAllSteps } from "@/components/valuation/PrintAllSteps";
 import { BasicInfo, Financials } from "@/types/valuation";
+import { Button } from "@/components/ui/Button";
 
-export default function SummaryPage() {
+export default function DetailsPage() {
   const router = useRouter();
   const [basicInfo, setBasicInfo] = useState<BasicInfo | null>(null);
   const [financials, setFinancials] = useState<Financials | null>(null);
@@ -30,7 +31,7 @@ export default function SummaryPage() {
   }, [router]);
 
   const handleBack = () => {
-    router.push("/valuation/step8");
+    router.push("/valuation/step9");
   };
 
   const handleHome = () => {
@@ -44,12 +45,26 @@ export default function SummaryPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <ValuationSummary
-          basicInfo={basicInfo}
-          financials={financials}
-          onBack={handleBack}
-          onHome={handleHome}
-        />
+        {/* Navigation buttons */}
+        <div className="flex flex-col-reverse sm:flex-row justify-center gap-4 mb-6 no-print">
+          <Button type="button" variant="outline" onClick={handleBack} size="lg">
+            比較表に戻る
+          </Button>
+          <Button type="button" variant="outline" onClick={handleHome} size="lg">
+            トップに戻る
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => window.print()}
+            size="lg"
+          >
+            印刷
+          </Button>
+        </div>
+
+        {/* PrintAllSteps component */}
+        <PrintAllSteps basicInfo={basicInfo} financials={financials} />
       </div>
     </div>
   );

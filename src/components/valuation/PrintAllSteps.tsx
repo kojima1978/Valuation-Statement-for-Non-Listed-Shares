@@ -115,6 +115,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             font-size: 9px;
             line-height: 1.3;
             color: #000 !important;
+            background-color: #fff !important;
           }
           .no-print {
             display: none !important;
@@ -146,7 +147,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
           .text-primary, .text-secondary, .text-green-700, .text-blue-700, .text-amber-700,
           .text-red-600, .text-blue-600,
           .font-black, .font-bold, .font-semibold,
-          .text-muted-foreground, .text-gray-600 {
+          .text-black, .text-gray-600 {
             color: #000 !important;
           }
           /* スペーシングを削減 */
@@ -183,15 +184,18 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
           }
           .border-b-2 { border-bottom-width: 1px !important; border-bottom-color: #000 !important; }
           .border-t-2 { border-top-width: 1px !important; border-top-color: #000 !important; }
-          /* 背景色を全て透明に */
+          /* 背景色を全て白に */
           .bg-blue-50, .bg-green-50, .bg-amber-50, .bg-primary\/10, .bg-primary\/5,
           .bg-white, .bg-gray-50, .bg-white\/50,
           .bg-green-300, .bg-blue-300, .bg-amber-300 {
-            background-color: transparent !important;
+            background-color: #fff !important;
           }
-          /* 全ての要素の背景を透明に */
+          /* 全ての要素の背景を白に */
           div[class*="bg-"] {
-            background-color: transparent !important;
+            background-color: #fff !important;
+          }
+          * {
+            background-color: #fff !important;
           }
           /* 角丸を削除 */
           .rounded-xl, .rounded-lg, .rounded { border-radius: 0 !important; }
@@ -207,8 +211,8 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
 
       {/* Title */}
       <div className="text-center border-b border-gray-400 pb-2 mb-3">
-        <h1 className="text-2xl font-bold">非上場株式評価明細書</h1>
-        <p className="text-xs text-gray-600">全ステップ詳細（Step 1-8）</p>
+        <h1 className="text-base font-bold text-black">非上場株式評価明細書</h1>
+        <p className="text-base text-black">全ステップ詳細（Step 1-8）</p>
       </div>
 
       {/* Step 1: 基本情報 */}
@@ -218,24 +222,65 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
         </h2>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <span className="text-gray-600">会社名:</span>
+            <span className="text-black">会社名:</span>
             <span className="font-semibold ml-1">{basicInfo.companyName}</span>
           </div>
           <div>
-            <span className="text-gray-600">課税時期:</span>
+            <span className="text-black">課税時期:</span>
             <span className="font-semibold ml-1">{basicInfo.taxationPeriod}</span>
           </div>
           <div>
-            <span className="text-gray-600">直前期末:</span>
+            <span className="text-black">直前期末:</span>
             <span className="font-semibold ml-1">{basicInfo.previousPeriod}</span>
           </div>
           <div>
-            <span className="text-gray-600">資本金:</span>
+            <span className="text-black">資本金:</span>
             <span className="font-semibold ml-1">{(basicInfo.capital || 0).toLocaleString()}千円</span>
           </div>
           <div>
-            <span className="text-gray-600">発行済株式数:</span>
+            <span className="text-black">発行済株式数:</span>
             <span className="font-semibold ml-1">{(basicInfo.issuedShares || 0).toLocaleString()}株</span>
+          </div>
+        </div>
+
+        {/* 計算結果プレビュー */}
+        <div className="border border-gray-300 p-2 mt-2 space-y-2">
+          <h3 className="font-bold border-b border-gray-300 pb-1 mb-1">計算結果：リアルタイムプレビュー</h3>
+
+          <div className="space-y-1">
+            <div className="flex justify-between">
+              <span className="text-black">1株当たりの資本金額</span>
+              <span className="font-semibold">
+                {((basicInfo.capital || 0) * 1000 / (basicInfo.issuedShares || 1)).toLocaleString(undefined, { maximumFractionDigits: 0 })}円
+              </span>
+            </div>
+            <div className="text-xs text-black">
+              計算式: {(basicInfo.capital || 0).toLocaleString()}千円 ÷ {(basicInfo.issuedShares || 1).toLocaleString()}株
+            </div>
+          </div>
+
+          <div className="space-y-1 border-t border-gray-300 pt-1">
+            <div className="flex justify-between">
+              <span className="text-black">1株50円とした場合の発行済株式数</span>
+              <span className="font-semibold">
+                {(((basicInfo.capital || 0) * 1000) / 50).toLocaleString(undefined, { maximumFractionDigits: 0 })}株
+              </span>
+            </div>
+            <div className="text-xs text-black">
+              計算式: {(basicInfo.capital || 0).toLocaleString()}千円 ÷ 50円
+            </div>
+          </div>
+
+          <div className="space-y-1 border-t border-gray-300 pt-1">
+            <div className="flex justify-between">
+              <span className="text-black">50円株での換算係数</span>
+              <span className="font-semibold">
+                {((basicInfo.issuedShares || 1) / (((basicInfo.capital || 0) * 1000) / 50)).toLocaleString(undefined, { maximumFractionDigits: 3 })}
+              </span>
+            </div>
+            <div className="text-xs text-black">
+              計算式: {(basicInfo.issuedShares || 1).toLocaleString()}株 ÷ {(((basicInfo.capital || 0) * 1000) / 50).toLocaleString(undefined, { maximumFractionDigits: 0 })}株
+            </div>
           </div>
         </div>
       </div>
@@ -247,25 +292,25 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
         </h2>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div>
-            <div className="text-sm text-muted-foreground">従業員数</div>
+            <div className="text-sm text-black">従業員数</div>
             <div className="font-semibold">
               {(basicInfo.employees || 0).toLocaleString()}人
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">総資産価額</div>
+            <div className="text-sm text-black">総資産価額</div>
             <div className="font-semibold">
-              {(basicInfo.totalAssets || 0).toLocaleString()}千円
+              {((basicInfo.totalAssets || 0) / 1000).toLocaleString()}千円
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">売上高</div>
+            <div className="text-sm text-black">売上高</div>
             <div className="font-semibold">
-              {(basicInfo.sales || 0).toLocaleString()}千円
+              {((basicInfo.sales || 0) / 1000).toLocaleString()}千円
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">業種区分</div>
+            <div className="text-sm text-black">業種区分</div>
             <div className="font-semibold">
               {!basicInfo.industryType
                 ? "その他"
@@ -279,8 +324,8 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">会社規模判定</div>
-            <div className="font-semibold text-lg text-primary">
+            <div className="text-sm text-black">会社規模判定</div>
+            <div className="font-semibold text-black">
               {basicInfo.size === "Big"
                 ? "大会社"
                 : basicInfo.size === "Medium"
@@ -289,8 +334,8 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             </div>
           </div>
           <div>
-            <div className="text-sm text-muted-foreground">斟酌率</div>
-            <div className="font-semibold text-lg">
+            <div className="text-sm text-black">斟酌率</div>
+            <div className="font-semibold text-black">
               {basicInfo.sizeMultiplier || 0.7}
             </div>
           </div>
@@ -308,19 +353,19 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             <h3 className="font-bold text-lg mb-2">配当金額</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <div className="text-xs text-muted-foreground">直前期</div>
+                <div className="text-xs text-black">直前期</div>
                 <div className="font-semibold">
                   {(financials.ownDividendPrev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々期</div>
+                <div className="text-xs text-black">直前々期</div>
                 <div className="font-semibold">
                   {(financials.ownDividend2Prev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々々期</div>
+                <div className="text-xs text-black">直前々々期</div>
                 <div className="font-semibold">
                   {(financials.ownDividend3Prev || 0).toLocaleString()}千円
                 </div>
@@ -332,37 +377,37 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             <h3 className="font-bold text-lg mb-2">所得金額・繰越欠損金</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-muted-foreground">直前期 所得金額</div>
+                <div className="text-xs text-black">直前期 所得金額</div>
                 <div className="font-semibold">
                   {(financials.ownTaxableIncomePrev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前期 繰越欠損金</div>
+                <div className="text-xs text-black">直前期 繰越欠損金</div>
                 <div className="font-semibold">
                   {(financials.ownCarryForwardLossPrev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々期 所得金額</div>
+                <div className="text-xs text-black">直前々期 所得金額</div>
                 <div className="font-semibold">
                   {(financials.ownTaxableIncome2Prev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々期 繰越欠損金</div>
+                <div className="text-xs text-black">直前々期 繰越欠損金</div>
                 <div className="font-semibold">
                   {(financials.ownCarryForwardLoss2Prev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々々期 所得金額</div>
+                <div className="text-xs text-black">直前々々期 所得金額</div>
                 <div className="font-semibold">
                   {(financials.ownTaxableIncome3Prev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々々期 繰越欠損金</div>
+                <div className="text-xs text-black">直前々々期 繰越欠損金</div>
                 <div className="font-semibold">
                   {(financials.ownCarryForwardLoss3Prev || 0).toLocaleString()}千円
                 </div>
@@ -374,25 +419,25 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             <h3 className="font-bold text-lg mb-2">資本金・利益剰余金</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-muted-foreground">直前期末 資本金</div>
+                <div className="text-xs text-black">直前期末 資本金</div>
                 <div className="font-semibold">
                   {(financials.ownCapitalPrev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前期末 利益剰余金</div>
+                <div className="text-xs text-black">直前期末 利益剰余金</div>
                 <div className="font-semibold">
                   {(financials.ownRetainedEarningsPrev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々期末 資本金</div>
+                <div className="text-xs text-black">直前々期末 資本金</div>
                 <div className="font-semibold">
                   {(financials.ownCapital2Prev || 0).toLocaleString()}千円
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">直前々期末 利益剰余金</div>
+                <div className="text-xs text-black">直前々期末 利益剰余金</div>
                 <div className="font-semibold">
                   {(financials.ownRetainedEarnings2Prev || 0).toLocaleString()}千円
                 </div>
@@ -422,20 +467,14 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                       {((financials.ownDividendPrev || 0) + (financials.ownDividend2Prev || 0)).toLocaleString()}千円
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>合計（円換算）:</span>
-                    <span className="font-semibold">
-                      {(((financials.ownDividendPrev || 0) + (financials.ownDividend2Prev || 0)) * 1000).toLocaleString()}円
-                    </span>
-                  </div>
                   <div className="flex justify-between border-t pt-1">
                     <span>2期平均 (b):</span>
                     <span className="font-bold">
                       {(financials.ownDividends || 0).toFixed(1)}円
                     </span>
                   </div>
-                  <div className="mt-1">
-                    計算式: (({(financials.ownDividendPrev || 0).toLocaleString()} + {(financials.ownDividend2Prev || 0).toLocaleString()}) × 1000) ÷ 2 = {(financials.ownDividends || 0).toFixed(1)}円
+                  <div className="mt-1 text-xs">
+                    計算式: ({(financials.ownDividendPrev || 0).toLocaleString()} + {(financials.ownDividend2Prev || 0).toLocaleString()})千円 ÷ 2 ÷ {totalShares.toLocaleString()}株 = {(financials.ownDividends || 0).toFixed(1)}円
                   </div>
                 </div>
               </div>
@@ -461,12 +500,6 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                           {((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)).toLocaleString()}千円
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>利益（円換算）:</span>
-                        <span className="font-semibold">
-                          {(((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)) * 1000).toLocaleString()}円
-                        </span>
-                      </div>
                     </div>
                   </div>
 
@@ -487,12 +520,6 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                           {((financials.ownTaxableIncome2Prev || 0) + (financials.ownCarryForwardLoss2Prev || 0)).toLocaleString()}千円
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span>利益（円換算）:</span>
-                        <span className="font-semibold">
-                          {(((financials.ownTaxableIncome2Prev || 0) + (financials.ownCarryForwardLoss2Prev || 0)) * 1000).toLocaleString()}円
-                        </span>
-                      </div>
                     </div>
                   </div>
 
@@ -501,9 +528,9 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                       <span>2期平均:</span>
                       <span className="font-semibold">
                         {(
-                          ((((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)) * 1000) +
-                          (((financials.ownTaxableIncome2Prev || 0) + (financials.ownCarryForwardLoss2Prev || 0)) * 1000)) / 2
-                        ).toLocaleString()}円
+                          (((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)) +
+                          ((financials.ownTaxableIncome2Prev || 0) + (financials.ownCarryForwardLoss2Prev || 0))) / 2
+                        ).toLocaleString()}千円
                       </span>
                     </div>
                     <div className="flex justify-between border-t pt-1 mt-1">
@@ -513,8 +540,8 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                       </span>
                     </div>
                   </div>
-                  <div className="mt-1">
-                    計算式: min(直前期利益, 2期平均) = min({(((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)) * 1000).toLocaleString()}, {((((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)) * 1000 + ((financials.ownTaxableIncome2Prev || 0) + (financials.ownCarryForwardLoss2Prev || 0)) * 1000) / 2).toLocaleString()}) = {(financials.ownProfit || 0).toLocaleString()}円
+                  <div className="mt-1 text-xs">
+                    計算式: min({((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)).toLocaleString()}千円, {((((financials.ownTaxableIncomePrev || 0) + (financials.ownCarryForwardLossPrev || 0)) + ((financials.ownTaxableIncome2Prev || 0) + (financials.ownCarryForwardLoss2Prev || 0))) / 2).toLocaleString()}千円) ÷ {totalShares.toLocaleString()}株 = {(financials.ownProfit || 0).toLocaleString()}円
                   </div>
                 </div>
               </div>
@@ -537,20 +564,14 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                       {((financials.ownCapitalPrev || 0) + (financials.ownRetainedEarningsPrev || 0)).toLocaleString()}千円
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>合計（円換算）:</span>
-                    <span className="font-semibold">
-                      {(((financials.ownCapitalPrev || 0) + (financials.ownRetainedEarningsPrev || 0)) * 1000).toLocaleString()}円
-                    </span>
-                  </div>
                   <div className="flex justify-between border-t pt-1">
                     <span>簿価純資産 (d):</span>
                     <span className="font-bold">
                       {(financials.ownBookValue || 0).toLocaleString()}円
                     </span>
                   </div>
-                  <div className="mt-1">
-                    計算式: ({(financials.ownCapitalPrev || 0).toLocaleString()} + {(financials.ownRetainedEarningsPrev || 0).toLocaleString()}) × 1000 = {(financials.ownBookValue || 0).toLocaleString()}円
+                  <div className="mt-1 text-xs">
+                    計算式: ({(financials.ownCapitalPrev || 0).toLocaleString()} + {(financials.ownRetainedEarningsPrev || 0).toLocaleString()})千円 ÷ {totalShares.toLocaleString()}株 = {(financials.ownBookValue || 0).toLocaleString()}円
                   </div>
                 </div>
               </div>
@@ -598,7 +619,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
             <h3 className="font-bold text-lg mb-2">A: 株価</h3>
             <div className="grid grid-cols-4 gap-4">
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-black">
                   {prevYear ? `前年平均（${prevYear}）` : "前年平均"}
                 </div>
                 <div className="font-semibold">
@@ -606,7 +627,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-black">
                   {twoMonthsBefore ? `前々月（${twoMonthsBefore}月）` : "前々月"}
                 </div>
                 <div className="font-semibold">
@@ -614,7 +635,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-black">
                   {oneMonthBefore ? `前月（${oneMonthBefore}月）` : "前月"}
                 </div>
                 <div className="font-semibold">
@@ -622,7 +643,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                 </div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-black">
                   {taxationMonth ? `課税時期の月（${taxationMonth}月）` : "課税時期の月"}
                 </div>
                 <div className="font-semibold">
@@ -631,7 +652,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
               </div>
             </div>
             {industryDetails && (
-              <div className="mt-2 bg-primary/10 p-2 rounded">
+              <div className="mt-2 p-2">
                 <div className="text-sm font-bold">
                   採用株価: {industryDetails.A.toLocaleString()}円
                 </div>
@@ -642,19 +663,19 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
           <div className="grid grid-cols-3 gap-4">
             <div>
               <h3 className="font-bold mb-2">B: 配当</h3>
-              <div className="font-semibold text-lg">
+              <div className="font-semibold">
                 {(financials.industryDividends || 0).toFixed(1)}円
               </div>
             </div>
             <div>
               <h3 className="font-bold mb-2">C: 利益</h3>
-              <div className="font-semibold text-lg">
+              <div className="font-semibold">
                 {(financials.industryProfit || 0).toLocaleString()}円
               </div>
             </div>
             <div>
               <h3 className="font-bold mb-2">D: 純資産</h3>
-              <div className="font-semibold text-lg">
+              <div className="font-semibold">
                 {(financials.industryBookValue || 0).toLocaleString()}円
               </div>
             </div>
@@ -670,16 +691,16 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                   <h4 className="font-semibold mb-1">① 配当比準 (b/B)</h4>
                   <div className="text-xs space-y-1">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">自社の配当 (b):</span>
+                      <span className="text-black">自社の配当 (b):</span>
                       <span className="font-semibold">{industryDetails.ratios.b.toFixed(1)}円</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">類似業種の配当 (B):</span>
+                      <span className="text-black">類似業種の配当 (B):</span>
                       <span className="font-semibold">{industryDetails.ratios.B.toFixed(1)}円</span>
                     </div>
                     <div className="flex justify-between border-t pt-1">
-                      <span className="text-muted-foreground">配当比準割合 (b÷B):</span>
-                      <span className="font-bold text-primary">{industryDetails.ratios.ratioB.toFixed(2)}</span>
+                      <span className="text-black">配当比準割合 (b÷B):</span>
+                      <span className="font-bold text-black">{industryDetails.ratios.ratioB.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -815,26 +836,24 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                     <span className="font-semibold">{industryDetails.A.toLocaleString()}円</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>× 比準割合:</span>
+                    <span>比準割合:</span>
                     <span className="font-semibold">{industryDetails.ratios.avgRatio.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>× 斟酌率:</span>
+                    <span>斟酌率:</span>
                     <span className="font-semibold">{industryDetails.multiplier}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span>× 原株換算:</span>
+                    <span>原株換算:</span>
                     <span className="font-semibold">
                       {industryDetails.conversion.ratio.toLocaleString(undefined, { maximumFractionDigits: 3 })}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center border-t pt-2 mt-2">
-                    <span className="font-bold">類似業種比準価額 =</span>
-                    <span className="font-black">{industryDetails.value.toLocaleString()}円</span>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="font-bold">
+                      類似業種比準価額 = {industryDetails.A.toLocaleString()} × {industryDetails.ratios.avgRatio.toFixed(2)} × {industryDetails.multiplier} × {industryDetails.conversion.ratio.toLocaleString(undefined, { maximumFractionDigits: 3 })} = {industryDetails.value.toLocaleString()}円
+                    </div>
                   </div>
-                </div>
-                <div className="mt-3 border border-gray-300 p-2">
-                  計算式: {industryDetails.A.toLocaleString()} × {industryDetails.ratios.avgRatio.toFixed(2)} × {industryDetails.multiplier} × {industryDetails.conversion.ratio.toLocaleString(undefined, { maximumFractionDigits: 3 })} = {industryDetails.value.toLocaleString()}円
                 </div>
               </div>
             </div>
@@ -851,27 +870,27 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div>資産 - 帳簿価額</div>
+              <div>資産（相続税評価額）</div>
               <div className="font-semibold">
-                {(financials.assetsBookValue || 0).toLocaleString()}千円
+                {((financials.assetsInheritanceValue || 0) / 1000).toLocaleString()}千円
               </div>
             </div>
             <div>
-              <div>資産 - 相続税評価額</div>
+              <div>資産（帳簿価額）</div>
               <div className="font-semibold">
-                {(financials.assetsInheritanceValue || 0).toLocaleString()}千円
+                {((financials.assetsBookValue || 0) / 1000).toLocaleString()}千円
               </div>
             </div>
             <div>
-              <div>負債 - 帳簿価額</div>
+              <div>負債（相続税評価額）</div>
               <div className="font-semibold">
-                {(financials.liabilitiesBookValue || 0).toLocaleString()}千円
+                {((financials.liabilitiesInheritanceValue || 0) / 1000).toLocaleString()}千円
               </div>
             </div>
             <div>
-              <div>負債 - 相続税評価額</div>
+              <div>負債（帳簿価額）</div>
               <div className="font-semibold">
-                {(financials.liabilitiesInheritanceValue || 0).toLocaleString()}千円
+                {((financials.liabilitiesBookValue || 0) / 1000).toLocaleString()}千円
               </div>
             </div>
           </div>
@@ -885,16 +904,16 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <span>資産（相続税評価額）:</span>
-                    <span className="font-semibold">{((financials.assetsInheritanceValue || 0) * 1000).toLocaleString()}円</span>
+                    <span className="font-semibold">{((financials.assetsInheritanceValue || 0) / 1000).toLocaleString()}千円</span>
                   </div>
                   <div className="flex justify-between">
                     <span>負債（相続税評価額）:</span>
-                    <span className="font-semibold">{((financials.liabilitiesInheritanceValue || 0) * 1000).toLocaleString()}円</span>
+                    <span className="font-semibold">{((financials.liabilitiesInheritanceValue || 0) / 1000).toLocaleString()}千円</span>
                   </div>
                   <div className="flex justify-between border-t pt-1">
                     <span>純資産（相続税評価額）:</span>
                     <span className="font-bold">
-                      {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) * 1000).toLocaleString()}円
+                      {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) / 1000).toLocaleString()}千円
                     </span>
                   </div>
                 </div>
@@ -905,16 +924,16 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                 <div className="space-y-1">
                   <div className="flex justify-between">
                     <span>資産（帳簿価額）:</span>
-                    <span className="font-semibold">{((financials.assetsBookValue || 0) * 1000).toLocaleString()}円</span>
+                    <span className="font-semibold">{((financials.assetsBookValue || 0) / 1000).toLocaleString()}千円</span>
                   </div>
                   <div className="flex justify-between">
                     <span>負債（帳簿価額）:</span>
-                    <span className="font-semibold">{((financials.liabilitiesBookValue || 0) * 1000).toLocaleString()}円</span>
+                    <span className="font-semibold">{((financials.liabilitiesBookValue || 0) / 1000).toLocaleString()}千円</span>
                   </div>
                   <div className="flex justify-between border-t pt-1">
                     <span>純資産（帳簿価額）:</span>
                     <span className="font-bold">
-                      {(((financials.assetsBookValue || 0) - (financials.liabilitiesBookValue || 0)) * 1000).toLocaleString()}円
+                      {(((financials.assetsBookValue || 0) - (financials.liabilitiesBookValue || 0)) / 1000).toLocaleString()}千円
                     </span>
                   </div>
                 </div>
@@ -926,22 +945,22 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                   <div className="flex justify-between">
                     <span>純資産（相続税評価額）:</span>
                     <span className="font-semibold">
-                      {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) * 1000).toLocaleString()}円
+                      {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) / 1000).toLocaleString()}千円
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>純資産（帳簿価額）:</span>
                     <span className="font-semibold">
-                      {(((financials.assetsBookValue || 0) - (financials.liabilitiesBookValue || 0)) * 1000).toLocaleString()}円
+                      {(((financials.assetsBookValue || 0) - (financials.liabilitiesBookValue || 0)) / 1000).toLocaleString()}千円
                     </span>
                   </div>
                   <div className="flex justify-between border-t pt-1">
                     <span>評価差額（含み益）:</span>
                     <span className="font-bold">
                       {(
-                        ((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) * 1000 -
-                        ((financials.assetsBookValue || 0) - (financials.liabilitiesBookValue || 0)) * 1000
-                      ).toLocaleString()}円
+                        (((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) -
+                        ((financials.assetsBookValue || 0) - (financials.liabilitiesBookValue || 0))) / 1000
+                      ).toLocaleString()}千円
                     </span>
                   </div>
                 </div>
@@ -953,7 +972,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                   <div className="flex justify-between items-center">
                     <span>純資産（相続税評価額）:</span>
                     <span className="font-semibold">
-                      {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) * 1000).toLocaleString()}円
+                      {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) / 1000).toLocaleString()}千円
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -966,7 +985,7 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
                   </div>
                 </div>
                 <div className="mt-3 border border-gray-300 p-2">
-                  計算式: {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) * 1000).toLocaleString()} ÷ {totalShares.toLocaleString()} = {step6Result.netAssetPerShare.toLocaleString()}円
+                  計算式: {(((financials.assetsInheritanceValue || 0) - (financials.liabilitiesInheritanceValue || 0)) / 1000).toLocaleString()}千円 ÷ {totalShares.toLocaleString()}株 = {step6Result.netAssetPerShare.toLocaleString()}円
                 </div>
               </div>
             </div>
@@ -1045,10 +1064,6 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
               <div className="font-black">
                 {step6Result.finalValue.toLocaleString()}円
               </div>
-              <div>
-                総額: {(step6Result.finalValue * totalShares).toLocaleString()}円
-                （{totalShares.toLocaleString()}株）
-              </div>
             </div>
           </div>
         </div>
@@ -1124,10 +1139,6 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
               </div>
               <div className="font-black">
                 {step7Result.finalValue.toLocaleString()}円
-              </div>
-              <div>
-                総額: {(step7Result.finalValue * totalShares).toLocaleString()}円
-                （{totalShares.toLocaleString()}株）
               </div>
             </div>
           </div>
@@ -1213,38 +1224,6 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
               <div className="font-black">
                 {step8Result.finalValue.toLocaleString()}円
               </div>
-              <div>
-                総額: {(step8Result.finalValue * totalShares).toLocaleString()}円
-                （{totalShares.toLocaleString()}株）
-              </div>
-            </div>
-          </div>
-
-          <div className="border border-gray-300 p-2">
-            <h3 className="font-bold border-b pb-2 mb-3">Step 6との比較</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Step 6（相続税評価額）:</span>
-                <span className="font-semibold">{step6Result.finalValue.toLocaleString()}円</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Step 8（シミュレーション）:</span>
-                <span className="font-semibold">{step8Result.finalValue.toLocaleString()}円</span>
-              </div>
-              <div className="flex justify-between border-t pt-2">
-                <span className="font-bold">差額:</span>
-                <span className="font-bold">
-                  {step8Result.finalValue - step6Result.finalValue > 0 ? "+" : ""}
-                  {(step8Result.finalValue - step6Result.finalValue).toLocaleString()}円
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-bold">差額（総額）:</span>
-                <span className="font-bold">
-                  {(step8Result.finalValue - step6Result.finalValue) * totalShares > 0 ? "+" : ""}
-                  {((step8Result.finalValue - step6Result.finalValue) * totalShares).toLocaleString()}円
-                </span>
-              </div>
             </div>
           </div>
         </div>
@@ -1259,44 +1238,44 @@ export function PrintAllSteps({ basicInfo, financials }: PrintAllStepsProps) {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b-2 border-primary">
+              <tr className="border-b-2 border-black">
                 <th className="text-left py-3 px-4 font-bold">項目</th>
                 <th className="text-center py-3 px-4">
-                  <div className="font-bold text-primary">相続税評価額</div>
-                  <div className="text-xs font-normal text-muted-foreground">Step 6</div>
+                  <div className="font-bold text-black">相続税評価額</div>
+                  <div className="text-xs font-normal text-black">Step 6</div>
                 </th>
                 <th className="text-center py-3 px-4">
-                  <div className="font-bold text-green-700">法人税法上の時価</div>
-                  <div className="text-xs font-normal text-muted-foreground">Step 7</div>
+                  <div className="font-bold text-black">法人税法上の時価</div>
+                  <div className="text-xs font-normal text-black">Step 7</div>
                 </th>
                 <th className="text-center py-3 px-4">
-                  <div className="font-bold text-amber-700">シミュレーション</div>
-                  <div className="text-xs font-normal text-muted-foreground">Step 8</div>
+                  <div className="font-bold text-black">シミュレーション</div>
+                  <div className="text-xs font-normal text-black">Step 8</div>
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b">
                 <td className="py-3 px-4 font-semibold">評価額（1株）</td>
-                <td className="text-center py-3 px-4 font-bold text-primary">
+                <td className="text-center py-3 px-4 font-bold text-black">
                   {step6Result.finalValue.toLocaleString()}円
                 </td>
-                <td className="text-center py-3 px-4 font-bold text-green-700">
+                <td className="text-center py-3 px-4 font-bold text-black">
                   {step7Result.finalValue.toLocaleString()}円
                 </td>
-                <td className="text-center py-3 px-4 font-bold text-amber-700">
+                <td className="text-center py-3 px-4 font-bold text-black">
                   {step8Result.finalValue.toLocaleString()}円
                 </td>
               </tr>
               <tr className="border-b">
                 <td className="py-3 px-4 font-semibold">評価額（総額）</td>
-                <td className="text-center py-3 px-4 font-bold text-primary">
+                <td className="text-center py-3 px-4 font-bold text-black">
                   {(step6Result.finalValue * totalShares).toLocaleString()}円
                 </td>
-                <td className="text-center py-3 px-4 font-bold text-green-700">
+                <td className="text-center py-3 px-4 font-bold text-black">
                   {(step7Result.finalValue * totalShares).toLocaleString()}円
                 </td>
-                <td className="text-center py-3 px-4 font-bold text-amber-700">
+                <td className="text-center py-3 px-4 font-bold text-black">
                   {(step8Result.finalValue * totalShares).toLocaleString()}円
                 </td>
               </tr>

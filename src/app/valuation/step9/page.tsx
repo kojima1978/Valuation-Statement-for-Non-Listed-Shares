@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ValuationSimulation } from "@/components/valuation/ValuationSimulation";
+import { ValuationSummary } from "@/components/valuation/ValuationSummary";
 import { BasicInfo, Financials } from "@/types/valuation";
 
-export default function Step8Page() {
+export default function SummaryPage() {
   const router = useRouter();
   const [basicInfo, setBasicInfo] = useState<BasicInfo | null>(null);
   const [financials, setFinancials] = useState<Financials | null>(null);
@@ -30,15 +30,15 @@ export default function Step8Page() {
   }, [router]);
 
   const handleBack = () => {
-    router.push("/valuation/step7");
+    router.push("/valuation/step8");
   };
 
   const handleHome = () => {
     router.push("/");
   };
 
-  const handleSummary = () => {
-    router.push("/valuation/step9");
+  const handleDetails = () => {
+    router.push("/valuation/step10");
   };
 
   if (!basicInfo || !financials) {
@@ -48,12 +48,12 @@ export default function Step8Page() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-primary/5 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <ValuationSimulation
+        <ValuationSummary
           basicInfo={basicInfo}
           financials={financials}
           onBack={handleBack}
           onHome={handleHome}
-          onSummary={handleSummary}
+          onDetails={handleDetails}
         />
       </div>
     </div>

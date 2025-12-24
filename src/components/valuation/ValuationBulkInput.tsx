@@ -1194,6 +1194,23 @@ export function ValuationBulkInput({
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <Label className="text-xs text-muted-foreground">
+                  前年平均
+                </Label>
+                <div className="relative">
+                  <NumberInput
+                    name="industryStockPricePrevYearAverage"
+                    value={formData.industryStockPricePrevYearAverage}
+                    onChange={handleChange}
+                    placeholder="0"
+                    className="pr-8 text-right"
+                  />
+                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
+                    円
+                  </span>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">
                   {taxationMonth
                     ? `課税時期の月（${taxationMonth}月）`
                     : "課税時期の月"}
@@ -1232,23 +1249,6 @@ export function ValuationBulkInput({
                   <NumberInput
                     name="industryStockPrice2MonthsBefore"
                     value={formData.industryStockPrice2MonthsBefore}
-                    onChange={handleChange}
-                    placeholder="0"
-                    className="pr-8 text-right"
-                  />
-                  <span className="absolute right-2 top-2.5 text-xs text-muted-foreground">
-                    円
-                  </span>
-                </div>
-              </div>
-              <div>
-                <Label className="text-xs text-muted-foreground">
-                  前年平均
-                </Label>
-                <div className="relative">
-                  <NumberInput
-                    name="industryStockPricePrevYearAverage"
-                    value={formData.industryStockPricePrevYearAverage}
                     onChange={handleChange}
                     placeholder="0"
                     className="pr-8 text-right"

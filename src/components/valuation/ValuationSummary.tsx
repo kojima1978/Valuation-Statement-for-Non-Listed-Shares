@@ -9,13 +9,13 @@ import {
   calculateCorporateTaxFairValue,
   calculateOwnFinancials,
 } from "@/lib/valuation-logic";
-import { PrintAllSteps } from "./PrintAllSteps";
 
 interface ValuationSummaryProps {
   basicInfo: BasicInfo;
   financials: Financials;
   onBack: () => void;
   onHome?: () => void;
+  onDetails?: () => void;
 }
 
 export function ValuationSummary({
@@ -23,6 +23,7 @@ export function ValuationSummary({
   financials,
   onBack,
   onHome,
+  onDetails,
 }: ValuationSummaryProps) {
   const results = useMemo(() => {
     // Step 6: 計算結果
@@ -70,14 +71,7 @@ export function ValuationSummary({
   const totalShares = basicInfo.issuedShares || 1;
 
   return (
-    <>
-      {/* Print-only view */}
-      <div className="hidden print:block">
-        <PrintAllSteps basicInfo={basicInfo} financials={financials} />
-      </div>
-
-      {/* Screen view */}
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700 print:hidden">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-700">
         <div className="text-center space-y-2">
           <h2 className="text-3xl font-black text-primary">比較表</h2>
           <p className="text-muted-foreground">
@@ -248,22 +242,16 @@ export function ValuationSummary({
           戻る
         </Button>
         {onHome && (
-          <>
-            <Button type="button" variant="outline" onClick={onHome} size="lg">
-              トップに戻る
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => window.print()}
-              size="lg"
-            >
-              一括印刷
-            </Button>
-          </>
+          <Button type="button" variant="outline" onClick={onHome} size="lg">
+            トップに戻る
+          </Button>
+        )}
+        {onDetails && (
+          <Button type="button" variant="outline" onClick={onDetails} size="lg">
+            詳細を見る
+          </Button>
         )}
       </div>
-      </div>
-    </>
+    </div>
   );
 }
